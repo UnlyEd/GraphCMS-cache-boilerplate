@@ -30,6 +30,7 @@ phases:
 
   build:
     commands:
+      - yarn lint
       - yarn test:coverage
 
   post_build:
