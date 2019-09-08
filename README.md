@@ -19,7 +19,7 @@ This service most important priority is the **service reliability**, not the **d
 > **P.S**: Please share the awesome things you build with the community!
 
 ## Overview
-### Why/when should I use this?
+### _"Why/when should I use this?"_
 
 - _"I don't use [GraphCMS](https://graphcms.com/), is this any useful to me?"_: 
     - **No**, it's likely not. 
@@ -44,7 +44,7 @@ This service most important priority is the **service reliability**, not the **d
     We therefore provide easy-to-use scripts, which allow you to manage each of those services from a centralised point.
     The only common point between the customers is that they all depend on the same GraphCMS API endpoint. _(and, if that's not your case, you could change that quite simply!)_
 
-### How should I use it?
+### _"How should I use it?"_
 
 - **_"I am just curious"_**: 
     - **Clone** the project, play around, run it on your local computer, deploy the service against your own AWS infrastructure and see how it works. 
@@ -75,6 +75,8 @@ Using this service instead of directly hitting a GraphCMS endpoint provides the 
 1. **Additional data processing**: 
     As this service acts as a proxy, it could also perform additional data processing, such as aggregations, that aren't available natively with GraphCMS.
     _This is a possibility, but not the main purpose. And it's out of the scope for now, but could come in handy later._
+
+---
 
 <!-- toc -->
 
@@ -162,7 +164,7 @@ If you've decided to clone/fork this project, please do the following:
     - `CC_TEST_REPORTER_ID`: **Use your own or remove it**, or your build results will be mixed with our own
     - For additional documentation, see [CI with AWS CodeBuild](#ci-with-aws-codebuild)
 
-### _How do I configure my app that currently queries GCMS API directly, and use my newly created cache service instead?_
+### _"How do I configure my app that currently queries GCMS API directly, and use my newly created cache service instead?"_
 
 It really depends on the implementation of you app here.
 If you're using react with Apollo for instance, it's just a matter of changing the endpoint to target your cache (`/cache-query` endpoint) rather than your GCMS endpoint, and not use any credentials (the cache doesn't need any).
@@ -501,7 +503,7 @@ Using the [AWS Console > CodeBuild](https://eu-west-1.console.aws.amazon.com/cod
 
 > Watch the [video tutorial](https://www.youtube.com/watch?v=30Uikocfdp0&feature=youtu.be)
 >
-> _**Disclaimer**: I forgot to enable "**Privileged**" mode for the Environment > Image > Additional configuration and I had to go to Environment > Override image to fix it._
+> _**Disclaimer**: We forgot to enable "**Privileged**" mode in the video, for the `Environment > Image > Additional configuration` and had to go to `Environment > Override image` to fix it._
 
 - Go to Create build project
 - Fill the project name and description, also, enable Build Badge (in case you ever want to use it)
