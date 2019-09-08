@@ -495,7 +495,13 @@ You can run interactive tests using Jest with `yarn test` script.
 ---
 ## CI with AWS CodeBuild
 
+> This step is useful only if you've **forked/cloned** the project and want to configure CI using AWS CodeBuild.
+
 Using the [AWS Console > CodeBuild](https://eu-west-1.console.aws.amazon.com/codesuite/codebuild/project/new?region=eu-west-1):
+
+> Watch the [video tutorial](https://www.youtube.com/watch?v=30Uikocfdp0&feature=youtu.be)
+>
+> _**Disclaimer**: I forgot to enable "**Privileged**" mode for the Environment > Image > Additional configuration and I had to go to Environment > Override image to fix it._
 
 - Go to Create build project
 - Fill the project name and description, also, enable Build Badge (in case you ever want to use it)
