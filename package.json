@@ -42,6 +42,8 @@
     "preversion": "yarn doc:toc && yarn lint && yarn test:once",
     "release": "yarn bump --prompt --commit --tag && git add CHANGELOG.md README.md && git commit --amend --no-edit && git push && git push --tags",
     "doc:toc": "yarn markdown-toc --maxdepth 4 -i README.md",
+    "sync:fork": "BRANCH=${BRANCH:-master}; git pull --rebase git@github.com:UnlyEd/GraphCMS-cache-boilerplate.git ${BRANCH}",
+    "sync:fork:merge": "BRANCH=${BRANCH:-master}; git pull git@github.com:UnlyEd/GraphCMS-cache-boilerplate.git ${BRANCH}",
     "lint": "eslint src/**",
     "lint:fix": "eslint src/** --fix",
     "lint:fix:preview": "eslint src/** --fix-dry-run",

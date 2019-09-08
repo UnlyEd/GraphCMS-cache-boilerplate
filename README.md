@@ -46,8 +46,13 @@ This service most important priority is the **service reliability**, not the **d
 
 ### How should I use it?
 
-- **_I am just curious_**: **Clone** the project, play around, run it on your local computer, deploy the service against your own AWS infrastructure and see how it works. _(don't forget to remove your service from AWS, once you're done playing around!)_
-- **_I'm thinking using it for a professional project_**: **Fork** the project, build you own stuff on top of it if you need to, keep up to date with the main project if needed (new features, bug fix, etc.), you'll be in control with the ability to quickly/simply catch up if ever needed.
+- **_I am just curious_**: 
+    **Clone** the project, play around, run it on your local computer, deploy the service against your own AWS infrastructure and see how it works. 
+    _(don't forget to remove your service from AWS, once you're done playing around!)_
+- **_I'm thinking using it for a professional project_**: 
+    **Fork** the project, build you own stuff on top of it if you need to, keep up to date with the main project if needed (new features, bug fix, etc.), 
+    you'll be in control with the ability to quickly/simply catch up if ever needed.
+    And this project comes with [some handy built-in scripts to help you keep it in sync!](#keeping-your-fork-up-to-date-with-this-boilerplate)
 
 ---
 ## Benefits
@@ -99,6 +104,7 @@ Using this service instead of directly hitting a GraphCMS endpoint provides the 
   * [Status](#status)
 - [Advanced notions](#advanced-notions)
   * [Multi customer instances](#multi-customer-instances)
+- [Keeping your fork up to date with this boilerplate](#keeping-your-fork-up-to-date-with-this-boilerplate)
 - [Testing](#testing)
   * [Known issues with testing](#known-issues-with-testing)
 - [CI with AWS CodeBuild](#ci-with-aws-codebuild)
@@ -459,6 +465,19 @@ See [Limitations](#limitations).
 
 It would still be possible to use just one redis instance with different databases (one db per customer, but the same connection for all).
 It really depends on your Redis service. Though, spearation by clusters is not handled by our Cache system. _(feel free to open a issue and propose a PR!)_
+
+---
+
+## Keeping your fork up to date with this boilerplate
+
+In case you forked the project and you'd like to keeping it up to date with this boilerplate, here are a few built-in scripts to help you out:
+- (from your fork) `yarn sync:fork` will `git pull --rebase` the boilerplate `master` branch into your own
+- (from your fork) `yarn sync:fork:merge` will `git pull` the boilerplate `master` branch into your own
+
+This is meant to be used manually, if you ever want to upgrade without trouble.
+
+**N.B**: Using the rebase mode will force you to force push afterwards (use it if you know what you're doing). 
+Using merge mode will create a merge commit (ugly, but simpler). _We use the rebase mode for our own private fork._
 
 ---
 
