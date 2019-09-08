@@ -22,35 +22,35 @@ This service most important priority is the **service reliability**, not the **d
 ### Why/when should I use this?
 
 - _"I don't use [GraphCMS](https://graphcms.com/), is this any useful to me?"_: 
-    **No**, it's likely not. 
+    - **No**, it's likely not. 
     This service is meant to be a proxy server between you apps and your GraphCMS API endpoint. 
     It's completely useless if you don't use GraphCMS in the first place.
 - _"I want to protect our apps against unpredictable outages from GraphCMS (or its 3rd party services), will this help me?"_:
-    **Yes**, it will. Read on!
+    - **Yes**, it will. Read on!
 - _"I want to lower our GraphCMS cost by reducing the number of calls hitting their API, will this help me?"_:
-    **Yes**, it will. Read on!
+    - **Yes**, it will. Read on!
 - _"I use frontend apps (react, angular, vue, etc.) and want to hide our GraphCMS API credentials that are currently visible in the browser source code, will this help me?"_:
-    **Yes**, it will. Read on!
+    - **Yes**, it will. Read on!
 - _"I want to improve the performance of our apps that rely on GraphCMS API, will this help me?"_:
-    **Yes**, it will. Read on!
+    - **Yes**, it will. Read on!
 - _"I want to run some automated data transformations after fetching those from GraphCMS API, will this help me?"_:
-    It **could**, but it's not the main purpose. 
+    - It **could**, but it's not the main purpose. 
     It could be a good place to start though, give it a try and see for yourself!
 - _"I'm just looking for something simple to setup that will just act as a temporary cache (caching mechanism on a limited period), is this still for me?"_:
-    **Yes**, this project provides many benefits/features, but it's possible to only use it as a **temporary caching mechanism** _(instead of cache contingency as it was meant to be at the beginning)_.
+    - **Yes**, this project provides many benefits/features, but it's possible to only use it as a **temporary caching mechanism** _(instead of cache contingency as it was meant to be at the beginning)_.
     See [Alternative strategy - Refresh the cache automatically by making it temporary](#alternative-strategy---refresh-the-cache-automatically-by-making-it-temporary)
 - _"I'm running a multi-tenants business, can you help about that?"_:
-    **Yes**, we do. We also run a multi-tenants business, meaning we have a dedicated service _(AWS Lambda, API GW, Redis instance, domain name)_ **for each of our customers**.
+    - **Yes**, we do. We also run a multi-tenants business, meaning we have a dedicated service _(AWS Lambda, API GW, Redis instance, domain name)_ **for each of our customers**.
     We therefore provide easy-to-use scripts, which allow you to manage each of those services from a centralised point.
     The only common point between the customers is that they all depend on the same GraphCMS API endpoint. _(and, if that's not your case, you could change that quite simply!)_
 
 ### How should I use it?
 
 - **_"I am just curious"_**: 
-    **Clone** the project, play around, run it on your local computer, deploy the service against your own AWS infrastructure and see how it works. 
+    - **Clone** the project, play around, run it on your local computer, deploy the service against your own AWS infrastructure and see how it works. 
     _(don't forget to remove your service from AWS, once you're done playing around!)_
 - **_"I'm thinking using it for a professional project"_**: 
-    **Fork** the project, build you own stuff on top of it if you need to, keep up to date with the main project if needed (new features, bug fix, etc.), 
+    - **Fork** the project, build you own stuff on top of it if you need to, keep up to date with the main project if needed (new features, bug fix, etc.), 
     you'll be in control with the ability to quickly/simply catch up if ever needed.
     And this project comes with [some handy built-in scripts to help you keep it in sync!](#keeping-your-fork-up-to-date-with-this-boilerplate)
 
