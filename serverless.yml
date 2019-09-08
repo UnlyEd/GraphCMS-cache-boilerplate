@@ -1,4 +1,4 @@
-service: gcms-cache
+service: gcms-cache-boilerplate
 frameworkVersion: "=1.49.0"
 
 plugins:
