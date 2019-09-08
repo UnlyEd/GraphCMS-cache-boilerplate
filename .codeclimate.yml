@@ -35,9 +35,9 @@ checks:
       threshold: 4
 
 plugins:
-#  eslint: # https://docs.codeclimate.com/docs/eslint
-#    enabled: true
-#    channel: "eslint-4" # Depends on installed ESLint version - See https://docs.codeclimate.com/docs/eslint#section-eslint-versions
+  eslint: # https://docs.codeclimate.com/docs/eslint
+    enabled: true
+    channel: "eslint-6" # Depends on installed ESLint version - See https://docs.codeclimate.com/docs/eslint#section-eslint-versions
   duplication: # https://docs.codeclimate.com/docs/duplication
     enabled: true
     config:
