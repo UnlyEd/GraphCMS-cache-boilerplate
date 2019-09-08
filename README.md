@@ -483,12 +483,12 @@ Using the [AWS Console > CodeBuild](https://eu-west-1.console.aws.amazon.com/cod
 - **Source** :
     - Select, as Source provider, Github
     - Make sure you're logged in to GitHub
-    - Then, select your project
+    - Then, select **Repository in my GitHub account** and enter the url of your project
     - Use Git clone depth: Full to avoid issues with failing builds due to missing fetched commits, necessary when using Code Climate coverage feature for instance
     - If you use git submodules, check the option (WARNING: If you are using private repositories as submodule, please use the HTTPS instead of SSH)
-- **Webhook**
-    - You can set some actions which will trigger the build
-    - Note, you can specify a branch by filling HEAD_REF, with content refs/heads/
+- **Primary source webhook events**
+    - Check **Rebuild every time a code change is pushed to this repository**
+    - Select the events that should trigger a build (all events are recommended, push and PR created/updated/reopened and merged)
 - **Environment**
     - We advise you to use a Managed image instead of a Custom image
     - Also, because of the pricing, please only use Ubuntu as Operating system
@@ -504,8 +504,6 @@ Using the [AWS Console > CodeBuild](https://eu-west-1.console.aws.amazon.com/cod
 - **Logs**
     - Cloudwatch logs are good way to check builds and debug in case of fail.
     - No need to store logs data on S3
-
-TODO video would be awesome, right
 
 ---
 ## Redis
