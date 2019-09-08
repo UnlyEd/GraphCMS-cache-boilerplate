@@ -495,6 +495,7 @@ Using the [AWS Console > CodeBuild](https://eu-west-1.console.aws.amazon.com/cod
     - Service role, select New service role
     - Leave default values for timeout, queued timeout, certificate and VPC
     - Compute, use the lowest configuration (for a lower cost) so 3GB memory, 2vCPUs
+    - Use **Privileged** mode, necessary because we spawn a docker instance in our tests
 - **Buildspec**
     - The most explicit way to work with CI / CD is to use buildspec (instead of build command) - And it's already configured in this project
     - Leave default Buildspec name, assuming you’ve named your file buildspec.yml
