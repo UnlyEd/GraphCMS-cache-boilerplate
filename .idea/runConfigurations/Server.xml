@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Server" type="NodeJSConfigurationType" application-parameters="node_modules/cross-env/dist/bin/cross-env-shell.js 'npx concurrently -p '{name}' -n 'redis,server' -c 'gray.bgWhite,yellow.bgBlue' \&quot;yarn start:redis\&quot; \&quot;yarn start:server\&quot;'" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="NODE_ENV" value="development" />
+    </envs>
+    <method v="2">
+      <option name="NpmBeforeRunTask" enabled="true">
+        <package-json value="$PROJECT_DIR$/package.json" />
+        <command value="run" />
+        <scripts>
+          <script value="delete:redis" />
+        </scripts>
+        <node-interpreter value="project" />
+        <envs>
+          <env name="NODE_ENV" value="development" />
+        </envs>
+      </option>
+    </method>
+  </configuration>
+</component>

@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="emulate:cli" type="NodeJSConfigurationType" node-parameters="-r esm" path-to-js-file="src/cli/index.js" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="NODE_ENV" value="development" />
+      <env name="CACHE_BASE_URL" value="http://localhost:8085" />
+    </envs>
+    <method v="2">
+      <option name="NpmBeforeRunTask" enabled="true">
+        <package-json value="$PROJECT_DIR$/package.json" />
+        <command value="run" />
+        <scripts>
+          <script value="sls:dotenv" />
+        </scripts>
+        <node-interpreter value="project" />
+        <envs>
+          <env name="NODE_ENV" value="development" />
+        </envs>
+      </option>
+    </method>
+  </configuration>
+</component>
