@@ -1,0 +1,191 @@
+service: gcms-cache
+frameworkVersion: "=1.49.0"
+
+plugins:
+  # - serverless-plugin-epsagon # https://github.com/epsagon/serverless-plugin-epsagon XXX We don't use it because it's not compatible with the basic_auth authorizer, used by /read-cache
+  - serverless-webpack # https://github.com/serverless-heaven/serverless-webpack
+  - serverless-offline # See https://github.com/dherault/serverless-offline
+  - '@unly/serverless-env-copy-plugin' # See https://github.com/UnlyEd/serverless-env-copy-plugin
+  - serverless-domain-manager # See https://github.com/amplify-education/serverless-domain-manager
+  - serverless-dotenv-plugin # See https://www.npmjs.com/package/serverless-dotenv-plugin
+
+package:
+  individually: true
+
+custom:
+  serverless-offline:
+    port: 8085 # Update .env.development and .env.test if you ever change this
+    showDuration: true
+  environment: ${env:NODE_ENV, 'development'}
+  envs:
+    development: # XXX Kept for compatibility but useless, development stage doesn't go to AWS
+      profile:
+      domain:
+        name:
+      memorySize:
+      redis:
+        url:
+    demoStaging:
+      profile: # AWS profile to use for this environment
+      domain:
+        name: # your staging domain name
+      memorySize: 256
+      redis:
+        url: # Using redisLab, should be something like redis-aaa.aa.eu-west-1-2.ec2.cloud.redislabs.com:11111
+    demo:
+      profile: # AWS profile to use for this environment - Useful if your staging and production apps don't live in the same AWS Account! (which is our case)
+      domain:
+        name: # your production domain name
+      memorySize: 512
+      redis:
+        url: # Using redisLab, should be something like redis-aaa.aa.eu-west-1-2.ec2.cloud.redislabs.com:11111
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules:
+      forceExclude:
+        - aws-sdk
+    packager: 'yarn'
+    packagerOptions: {}
+    excludeFiles: src/**/*.test.js
+    keepOutputDirectory: true
+  customDomain:
+    enabled: true
+    domainName: ${self:custom.envs.${self:provider.stage}.domain.name}
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+
+provider:
+  name: aws
+  runtime: nodejs10.x # AWS keeps up to date with the latest v10 version - See https://forum.serverless.com/t/node-10-lambdas-on-aws/8302/2
+  versionFunctions: false # See https://serverless.com/framework/docs/providers/aws/guide/functions#versioning-deployed-functions
+  logRetentionInDays: 60
+  stage: ${opt:stage, 'development'}
+  region: eu-west-1
+  memorySize: ${self:custom.envs.${self:provider.stage}.memorySize, '128'}
+  timeout: 30 # 30sec timeout, we perform long-running lambda sometimes (such as /refresh-cache)
+  logs:
+    restApi: true # Enable logs in other services, such as API GW - See https://serverless.com/blog/framework-release-v142/
+  deploymentBucket:
+    serverSideEncryption: AES256
+  environment:
+    NODE_ENV: ${self:custom.environment}
+    REDIS_URL: ${self:custom.envs.${self:provider.stage}.redis.url, ''}
+    EPSAGON_APP_NAME: ${self:service}-${self:provider.stage}-${self:custom.environment}
+    CACHE_BASE_URL: https://${self:custom.envs.${self:provider.stage}.domain.name}
+  profile: ${self:custom.envs.${self:provider.stage}.profile, ''}
+  stackTags:
+    env: ${self:custom.environment}
+    stage: ${self:provider.stage}
+    region: ${self:provider.region}
+    service: ${self:service}
+    service-type: api
+    runtime: ${self:provider.runtime}
+
+functions:
+  cache-query:
+    handler: src/functions/epsagon.cacheQuery
+    events:
+      - http:
+          method: POST
+          path: /cache-query
+          cors: true
+
+  reset-cache:
+    handler: src/functions/epsagon.resetCache
+    # XXX Ensures the lambda always has one slot available, and never use more than one lambda instance at once.
+    #  Avoids GraphCMS webhooks to abuse our lambda (GCMS will trigger the webhook once per create/update/delete operation)
+    #  This makes sure only one instance of that lambda can run at once, to avoid refreshing the cache with parallel runs
+    #  Avoids flushing the redis DB multiple times at the same time
+    #  See https://itnext.io/the-everything-guide-to-lambda-throttling-reserved-concurrency-and-execution-limits-d64f144129e5
+    reservedConcurrency: 1
+    events:
+      - http:
+          method: POST
+          path: /reset-cache
+          cors: true
+
+  refresh-cache:
+    handler: src/functions/refresh-cache.refreshCache # FIXME Don't use epsagon wrapper - creates an infinite loop (see slack)
+    # XXX Ensures the lambda always has one slot available, and never use more than one lambda instance at once.
+    #  Avoids GraphCMS webhooks to abuse our lambda (GCMS will trigger the webhook once per create/update/delete operation)
+    #  This makes sure only one instance of that lambda can run at once, to avoid refreshing the cache with parallel runs
+    #  Avoids spawning tons of API calls (most of them would timeout anyway, around 80%)
+    #  See https://itnext.io/the-everything-guide-to-lambda-throttling-reserved-concurrency-and-execution-limits-d64f144129e5
+    reservedConcurrency: 1
+    events:
+      - http:
+          method: POST
+          path: /refresh-cache
+          cors: true
+
+  status:
+    handler: src/functions/status.status # Don't trace status route
+    events:
+      - http:
+          method: GET
+          path: /status
+          cors: true
+
+  read-cache:
+    handler: src/functions/epsagon.readCache
+    events:
+      - http:
+          method: GET
+          path: /read-cache
+          cors: true
+          authorizer: # See https://medium.com/@Da_vidgf/http-basic-auth-with-api-gateway-and-serverless-5ae14ad0a270
+            name: authorizer
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.Authorization
+            type: request
+  authorizer:
+    handler: src/authorizers/basic-auth.handler # A Basic-Auth authentication is required in non-local environments
+
+resources:
+  Conditions:
+    IsProduction:
+      Fn::Equals:
+        - ${self:custom.environment}
+        - "production"
+  Resources:
+    GatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.WWW-Authenticate: "'Basic'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+      # XXX Health check is meant to check if /status endpoint replies properly, it doesn't check internal behaviour.
+      #  Also, it doesn't warm any endpoint but /status. And it won't configure alerts automatically.
+      #  Feel free to enable it if you need it, it will increase your cost, though.
+      #  XXX P.S: We are looking for a better way to perform health checks, AWS is too "heavy", too many useless calls are sent and we couldn't configure alerts automatically to hit our slack channel - If you know of a better way, please share!
+#    healthCheck:
+#      Condition: IsProduction # Only deploy HealthCheck in production environment
+#      Type: "AWS::Route53::HealthCheck"
+#      Properties:
+#        HealthCheckConfig:
+#          EnableSNI: true
+#          FailureThreshold: "3"
+#          FullyQualifiedDomainName: ${self:custom.envs.${self:provider.stage}.domain.name}
+#          ResourcePath: "/status" # XXX Optimize cost by hitting a simple endpoint which doesn't download anything and avoid cost due to data transfer (S3, API Gateway)
+#          MeasureLatency: false # XXX Cost $1/stage/month ($2/month for staging + production, for a single customer)
+#          Port: "80"
+#          Regions: # XXX Only check from UE/US (minimum 3 regions is required), cost much less money and not useful to check from all datacenters in the world
+#            - 'eu-west-1' # Ireland
+#            - 'us-west-1' # California
+#            - 'us-east-1' # Virginia
+#          RequestInterval: "30" # 30 is the max allowed
+#          Type: "HTTPS"
+#        HealthCheckTags:
+#          - Key: "env"
+#            Value: ${self:custom.environment}
+#          - Key: "stage"
+#            Value: ${self:provider.stage}
+#          - Key: "region"
+#            Value: ${self:provider.region}
+#          - Key: "service"
+#            Value: ${self:service}
+#          - Key: "service-type"
+#            Value: api

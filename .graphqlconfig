@@ -1,0 +1,23 @@
+{
+  "schemaPath": "schema.graphql",
+  "extensions": {
+    "endpoints": {
+      "staging": {
+        "url": "https://api-euwest.graphcms.com/v1/cjyi8gl5m00tm01e91polc50t/master",
+        "introspect": true,
+        "headers": {
+          "user-agent": "JS GraphQL",
+          "Authorization": "Bearer ${env:GRAPHCMS_TOKEN}"
+        }
+      },
+      "production": {
+        "url": "https://api-euwest.graphcms.com/v1/cjyi8gl5m00tm01e91polc50t/master",
+        "introspect": true,
+        "headers": {
+          "user-agent": "JS GraphQL",
+          "Authorization": "Bearer ${env:GRAPHCMS_TOKEN}"
+        }
+      }
+    }
+  }
+}

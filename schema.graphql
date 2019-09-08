@@ -1,0 +1,501 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"An object with an ID"
+interface Node {
+  "The id of the object."
+  id: ID!
+}
+
+type AggregateAsset {
+  count: Int!
+}
+
+type Asset implements Node {
+  createdAt: DateTime!
+  fileName: String!
+  handle: String!
+  height: Float
+  id: ID!
+  mimeType: String
+  size: Float
+  status: Status!
+  updatedAt: DateTime!
+  "Get the url for the asset with provided transformations applied."
+  url(transformation: AssetTransformationInput): String!
+  width: Float
+}
+
+"A connection to a list of items."
+type AssetConnection {
+  aggregate: AggregateAsset!
+  "A list of edges."
+  edges: [AssetEdge]!
+  "Information to aid in pagination."
+  pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type AssetEdge {
+  "A cursor for use in pagination."
+  cursor: String!
+  "The item at the end of the edge."
+  node: Asset!
+}
+
+type AssetPreviousValues {
+  createdAt: DateTime!
+  fileName: String!
+  handle: String!
+  height: Float
+  id: ID!
+  mimeType: String
+  size: Float
+  status: Status!
+  updatedAt: DateTime!
+  width: Float
+}
+
+type AssetSubscriptionPayload {
+  mutation: MutationType!
+  node: Asset
+  previousValues: AssetPreviousValues
+  updatedFields: [String!]
+}
+
+type BatchPayload {
+  "The number of nodes that have been affected by the Batch operation."
+  count: Long!
+}
+
+type Mutation {
+  createAsset(data: AssetCreateInput!): Asset!
+  deleteAsset(where: AssetWhereUniqueInput!): Asset
+  deleteManyAssets(where: AssetWhereInput): BatchPayload!
+  updateAsset(data: AssetUpdateInput!, where: AssetWhereUniqueInput!): Asset
+  updateManyAssets(data: AssetUpdateManyMutationInput!, where: AssetWhereInput): BatchPayload!
+  uploadAsset(data: AssetUploadInput!): Asset!
+  upsertAsset(create: AssetCreateInput!, update: AssetUpdateInput!, where: AssetWhereUniqueInput!): Asset!
+}
+
+"Information about pagination in a connection."
+type PageInfo {
+  "When paginating forwards, the cursor to continue."
+  endCursor: String
+  "When paginating forwards, are there more items?"
+  hasNextPage: Boolean!
+  "When paginating backwards, are there more items?"
+  hasPreviousPage: Boolean!
+  "When paginating backwards, the cursor to continue."
+  startCursor: String
+}
+
+type Query {
+  asset(where: AssetWhereUniqueInput!): Asset
+  assets(after: String, before: String, first: Int, last: Int, orderBy: AssetOrderByInput, skip: Int, where: AssetWhereInput): [Asset]!
+  assetsConnection(after: String, before: String, first: Int, last: Int, orderBy: AssetOrderByInput, skip: Int, where: AssetWhereInput): AssetConnection!
+  "Fetches an object given its ID"
+  node(
+    #The ID of an object
+    id: ID!
+  ): Node
+}
+
+enum AssetOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  fileName_ASC
+  fileName_DESC
+  handle_ASC
+  handle_DESC
+  height_ASC
+  height_DESC
+  id_ASC
+  id_DESC
+  mimeType_ASC
+  mimeType_DESC
+  size_ASC
+  size_DESC
+  status_ASC
+  status_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  width_ASC
+  width_DESC
+}
+
+enum DocumentFileTypes {
+  doc
+  docx
+  html
+  jpg
+  odp
+  ods
+  odt
+  pdf
+  png
+  ppt
+  pptx
+  svg
+  txt
+  webp
+  xls
+  xlsx
+}
+
+enum ImageFit {
+  #Resizes the image to fit within the specified parameters without distorting, cropping, or changing the aspect ratio.
+  clip
+  #Resizes the image to fit the specified parameters exactly by removing any parts of the image that don't fit within the boundaries.
+  crop
+  #Resizes the image to fit within the parameters, but as opposed to 'fit:clip' will not scale the image if the image is smaller than the output size.
+  max
+  #Resizes the image to fit the specified parameters exactly by scaling the image to the desired size. The aspect ratio of the image is not respected and the image can be distorted using this method.
+  scale
+}
+
+enum Locale {
+  EN
+}
+
+enum MutationType {
+  CREATED
+  DELETED
+  UPDATED
+}
+
+enum Status {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
+input AssetCreateInput {
+  fileName: String!
+  handle: String!
+  height: Float
+  mimeType: String
+  size: Float
+  status: Status
+  width: Float
+}
+
+input AssetSubscriptionWhereInput {
+  "Logical AND on all given filters."
+  AND: [AssetSubscriptionWhereInput!]
+  "Logical NOT on all given filters combined by AND."
+  NOT: [AssetSubscriptionWhereInput!]
+  "Logical OR on all given filters."
+  OR: [AssetSubscriptionWhereInput!]
+  "The subscription event gets dispatched when it's listed in mutation_in"
+  mutation_in: [MutationType!]
+  node: AssetWhereInput
+  "The subscription event gets only dispatched when one of the updated fields names is included in this list"
+  updatedFields_contains: String
+  "The subscription event gets only dispatched when all of the field names included in this list have been updated"
+  updatedFields_contains_every: [String!]
+  "The subscription event gets only dispatched when some of the field names included in this list have been updated"
+  updatedFields_contains_some: [String!]
+}
+
+"Transformations for Assets"
+input AssetTransformationInput {
+  document: DocumentTransformationInput
+  image: ImageTransformationInput
+  "Pass `true` if you want to validate the passed transformation parameters"
+  validateOptions: Boolean = false
+}
+
+input AssetUpdateInput {
+  fileName: String
+  handle: String
+  height: Float
+  mimeType: String
+  size: Float
+  status: Status
+  width: Float
+}
+
+input AssetUpdateManyMutationInput {
+  fileName: String
+  handle: String
+  height: Float
+  mimeType: String
+  size: Float
+  status: Status
+  width: Float
+}
+
+input AssetUploadInput {
+  status: Status
+  url: String!
+}
+
+input AssetWhereInput {
+  "Logical AND on all given filters."
+  AND: [AssetWhereInput!]
+  "Logical NOT on all given filters combined by AND."
+  NOT: [AssetWhereInput!]
+  "Logical OR on all given filters."
+  OR: [AssetWhereInput!]
+  _search: String
+  createdAt: DateTime
+  "All values greater than the given value."
+  createdAt_gt: DateTime
+  "All values greater than or equal the given value."
+  createdAt_gte: DateTime
+  "All values that are contained in given list."
+  createdAt_in: [DateTime!]
+  "All values less than the given value."
+  createdAt_lt: DateTime
+  "All values less than or equal the given value."
+  createdAt_lte: DateTime
+  "All values that are not equal to given value."
+  createdAt_not: DateTime
+  "All values that are not contained in given list."
+  createdAt_not_in: [DateTime!]
+  fileName: String
+  "All values containing the given string."
+  fileName_contains: String
+  "All values ending with the given string."
+  fileName_ends_with: String
+  "All values greater than the given value."
+  fileName_gt: String
+  "All values greater than or equal the given value."
+  fileName_gte: String
+  "All values that are contained in given list."
+  fileName_in: [String!]
+  "All values less than the given value."
+  fileName_lt: String
+  "All values less than or equal the given value."
+  fileName_lte: String
+  "All values that are not equal to given value."
+  fileName_not: String
+  "All values not containing the given string."
+  fileName_not_contains: String
+  "All values not ending with the given string."
+  fileName_not_ends_with: String
+  "All values that are not contained in given list."
+  fileName_not_in: [String!]
+  "All values not starting with the given string."
+  fileName_not_starts_with: String
+  "All values starting with the given string."
+  fileName_starts_with: String
+  handle: String
+  "All values containing the given string."
+  handle_contains: String
+  "All values ending with the given string."
+  handle_ends_with: String
+  "All values greater than the given value."
+  handle_gt: String
+  "All values greater than or equal the given value."
+  handle_gte: String
+  "All values that are contained in given list."
+  handle_in: [String!]
+  "All values less than the given value."
+  handle_lt: String
+  "All values less than or equal the given value."
+  handle_lte: String
+  "All values that are not equal to given value."
+  handle_not: String
+  "All values not containing the given string."
+  handle_not_contains: String
+  "All values not ending with the given string."
+  handle_not_ends_with: String
+  "All values that are not contained in given list."
+  handle_not_in: [String!]
+  "All values not starting with the given string."
+  handle_not_starts_with: String
+  "All values starting with the given string."
+  handle_starts_with: String
+  height: Float
+  "All values greater than the given value."
+  height_gt: Float
+  "All values greater than or equal the given value."
+  height_gte: Float
+  "All values that are contained in given list."
+  height_in: [Float!]
+  "All values less than the given value."
+  height_lt: Float
+  "All values less than or equal the given value."
+  height_lte: Float
+  "All values that are not equal to given value."
+  height_not: Float
+  "All values that are not contained in given list."
+  height_not_in: [Float!]
+  id: ID
+  "All values containing the given string."
+  id_contains: ID
+  "All values ending with the given string."
+  id_ends_with: ID
+  "All values greater than the given value."
+  id_gt: ID
+  "All values greater than or equal the given value."
+  id_gte: ID
+  "All values that are contained in given list."
+  id_in: [ID!]
+  "All values less than the given value."
+  id_lt: ID
+  "All values less than or equal the given value."
+  id_lte: ID
+  "All values that are not equal to given value."
+  id_not: ID
+  "All values not containing the given string."
+  id_not_contains: ID
+  "All values not ending with the given string."
+  id_not_ends_with: ID
+  "All values that are not contained in given list."
+  id_not_in: [ID!]
+  "All values not starting with the given string."
+  id_not_starts_with: ID
+  "All values starting with the given string."
+  id_starts_with: ID
+  mimeType: String
+  "All values containing the given string."
+  mimeType_contains: String
+  "All values ending with the given string."
+  mimeType_ends_with: String
+  "All values greater than the given value."
+  mimeType_gt: String
+  "All values greater than or equal the given value."
+  mimeType_gte: String
+  "All values that are contained in given list."
+  mimeType_in: [String!]
+  "All values less than the given value."
+  mimeType_lt: String
+  "All values less than or equal the given value."
+  mimeType_lte: String
+  "All values that are not equal to given value."
+  mimeType_not: String
+  "All values not containing the given string."
+  mimeType_not_contains: String
+  "All values not ending with the given string."
+  mimeType_not_ends_with: String
+  "All values that are not contained in given list."
+  mimeType_not_in: [String!]
+  "All values not starting with the given string."
+  mimeType_not_starts_with: String
+  "All values starting with the given string."
+  mimeType_starts_with: String
+  size: Float
+  "All values greater than the given value."
+  size_gt: Float
+  "All values greater than or equal the given value."
+  size_gte: Float
+  "All values that are contained in given list."
+  size_in: [Float!]
+  "All values less than the given value."
+  size_lt: Float
+  "All values less than or equal the given value."
+  size_lte: Float
+  "All values that are not equal to given value."
+  size_not: Float
+  "All values that are not contained in given list."
+  size_not_in: [Float!]
+  status: Status
+  "All values that are contained in given list."
+  status_in: [Status!]
+  "All values that are not equal to given value."
+  status_not: Status
+  "All values that are not contained in given list."
+  status_not_in: [Status!]
+  updatedAt: DateTime
+  "All values greater than the given value."
+  updatedAt_gt: DateTime
+  "All values greater than or equal the given value."
+  updatedAt_gte: DateTime
+  "All values that are contained in given list."
+  updatedAt_in: [DateTime!]
+  "All values less than the given value."
+  updatedAt_lt: DateTime
+  "All values less than or equal the given value."
+  updatedAt_lte: DateTime
+  "All values that are not equal to given value."
+  updatedAt_not: DateTime
+  "All values that are not contained in given list."
+  updatedAt_not_in: [DateTime!]
+  width: Float
+  "All values greater than the given value."
+  width_gt: Float
+  "All values greater than or equal the given value."
+  width_gte: Float
+  "All values that are contained in given list."
+  width_in: [Float!]
+  "All values less than the given value."
+  width_lt: Float
+  "All values less than or equal the given value."
+  width_lte: Float
+  "All values that are not equal to given value."
+  width_not: Float
+  "All values that are not contained in given list."
+  width_not_in: [Float!]
+}
+
+input AssetWhereUniqueInput {
+  handle: String
+  id: ID
+}
+
+input DocumentOutputInput {
+  """
+  Transforms a document into a desired file type.
+  See this matrix for format support:
+
+  PDF:\tjpg, odp, ods, odt, png, svg, txt, and webp
+  DOC:\tdocx, html, jpg, odt, pdf, png, svg, txt, and webp
+  DOCX:\tdoc, html, jpg, odt, pdf, png, svg, txt, and webp
+  ODT:\tdoc, docx, html, jpg, pdf, png, svg, txt, and webp
+  XLS:\tjpg, pdf, ods, png, svg, xlsx, and webp
+  XLSX:\tjpg, pdf, ods, png, svg, xls, and webp
+  ODS:\tjpg, pdf, png, xls, svg, xlsx, and webp
+  PPT:\tjpg, odp, pdf, png, svg, pptx, and webp
+  PPTX:\tjpg, odp, pdf, png, svg, ppt, and webp
+  ODP:\tjpg, pdf, png, ppt, svg, pptx, and webp
+  BMP:\tjpg, odp, ods, odt, pdf, png, svg, and webp
+  GIF:\tjpg, odp, ods, odt, pdf, png, svg, and webp
+  JPG:\tjpg, odp, ods, odt, pdf, png, svg, and webp
+  PNG:\tjpg, odp, ods, odt, pdf, png, svg, and webp
+  WEBP:\tjpg, odp, ods, odt, pdf, png, svg, and webp
+  TIFF:\tjpg, odp, ods, odt, pdf, png, svg, and webp
+  AI:\t    jpg, odp, ods, odt, pdf, png, svg, and webp
+  PSD:\tjpg, odp, ods, odt, pdf, png, svg, and webp
+  SVG:\tjpg, odp, ods, odt, pdf, png, and webp
+  HTML:\tjpg, odt, pdf, svg, txt, and webp
+  TXT:\tjpg, html, odt, pdf, svg, and webp
+  """
+  format: DocumentFileTypes
+}
+
+"Transformations for Documents"
+input DocumentTransformationInput {
+  "Changes the output for the file."
+  output: DocumentOutputInput
+}
+
+input ImageResizeInput {
+  "The default value for the fit parameter is fit:clip."
+  fit: ImageFit
+  "The height in pixels to resize the image to. The value must be an integer from 1 to 10000."
+  height: Int
+  "The width in pixels to resize the image to. The value must be an integer from 1 to 10000."
+  width: Int
+}
+
+"Transformations for Images"
+input ImageTransformationInput {
+  "Resizes the image"
+  resize: ImageResizeInput
+}
+
+
+scalar DateTime
+
+"""
+The `Long` scalar type represents non-fractional signed whole numeric values.
+Long can represent values between -(2^63) and 2^63 - 1.
+"""
+scalar Long
