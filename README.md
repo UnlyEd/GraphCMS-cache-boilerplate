@@ -117,6 +117,7 @@ Using this service instead of directly hitting a GraphCMS endpoint provides the 
     + [Data eviction policy](#data-eviction-policy)
     + [Password](#password)
 - [Other known limitations and considerations](#other-known-limitations-and-considerations)
+- [Changelog](#changelog)
 - [Contributing](#contributing)
   * [Versions](#versions)
     + [SemVer](#semver)
@@ -599,6 +600,14 @@ This way, it's much easier to manage (one password per environment, not one per 
 - When the `/refresh-cache` or `/read-cache` are called, the `redis.keys` method is used, which is blocking and not recommended for production applications. 
     A better implementation should be made there, probably following [this](https://github.com/luin/ioredis#streamify-scanning).
     It is not such a concern though, since those endpoints should rarely be called, and it won't be an issue if the redis store doesn't contain lots of keys anyway.
+
+---
+
+## Changelog
+
+> Updates are consolidated in our [CHANGELOG](./CHANGELOG.md) file.
+
+It's meant to be a developer-friendly way to know what benefits you'll get from updating your clone/fork, and provides a update history.
 
 ---
 
