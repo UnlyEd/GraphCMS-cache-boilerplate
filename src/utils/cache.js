@@ -23,6 +23,52 @@ export const buildItem = (queryResults) => {
 };
 
 /**
+ * Returns a usable version of an item information
+ * Basically parses it if it's a string (the way it's stored in redis)
+ * Or do nothing if it's already parsed
+ *
+ * @param item
+ * @return {any}
+ */
+export const extractCachedItem = (item) => {
+  if (typeof item === 'string') {
+    try {
+      return JSON.parse(item);
+    } catch (e) {
+      logger.error(`Failed to parse item "${item}".`);
+
+      // XXX Item can't be parsed, so it's likely a string that was meant to be the query results
+      //  Returns the item as query results and cross fingers, this shouldn't happen,
+      //  but may happen if dealing with an item that was stored before the items became an object
+      return {
+        queryResults: item,
+      };
+    }
+  } else {
+    return item;
+  }
+};
+
+/**
+ * Returns only the metadata contained in an item, doesn't return the actual data
+ *
+ * @param item
+ * @return {{createdAt: *, version: *, updatedAt: *}|null}
+ */
+export const extractMetadataFromItem = (item) => {
+  if (item === null) {
+    return null;
+  }
+  const { createdAt, updatedAt, version } = extractCachedItem(item);
+
+  return {
+    createdAt,
+    updatedAt,
+    version,
+  };
+};
+
+/**
  * Adds an item to the cache
  * An item is composed of metadata and query results
  * Automatically add metadata
@@ -63,33 +109,6 @@ export const updateItemInCache = async (redisClient, query, headers, queryResult
 };
 
 /**
- * Returns a usable version of an item information
- * Basically parses it if it's a string (the way it's stored in redis)
- * Or do nothing if it's already parsed
- *
- * @param item
- * @return {any}
- */
-export const extractCachedItem = (item) => {
-  if (typeof item === 'string') {
-    try {
-      return JSON.parse(item);
-    } catch (e) {
-      logger.error(`Failed to parse item "${item}".`);
-
-      // XXX Item can't be parsed, so it's likely a string that was meant to be the query results
-      //  Returns the item as query results and cross fingers, this shouldn't happen,
-      //  but may happen if dealing with an item that was stored before the items became an object
-      return {
-        queryResults: item,
-      };
-    }
-  } else {
-    return item;
-  }
-};
-
-/**
  * Returns the query results object
  *
  * @param item
@@ -105,25 +124,6 @@ export const extractQueryResultsFromItem = (item) => {
   const { queryResults } = extractCachedItem(item);
 
   return queryResults;
-};
-
-/**
- * Returns only the metadata contained in an item, doesn't return the actual data
- *
- * @param item
- * @return {{createdAt: *, version: *, updatedAt: *}|null}
- */
-export const extractMetadataFromItem = (item) => {
-  if (item === null) {
-    return null;
-  }
-  const { createdAt, updatedAt, version } = extractCachedItem(item);
-
-  return {
-    createdAt,
-    updatedAt,
-    version,
-  };
 };
 
 /**
@@ -143,6 +143,6 @@ export const extractMetadataFromItem = (item) => {
  */
 export const printCachedItem = (cachedItem, stripData = false) => {
   // If object, use object as stripper, otherwise convert to boolean
-  const stripper = typeof stripData === 'object' ? { queryResults: { data: stripData } } : !!stripData ? { queryResults: { data: undefined } } : {};
+  const stripper = typeof stripData === 'object' ? { queryResults: { data: stripData } } : !!stripData ? { queryResults: { data: undefined } } : {}; // eslint-disable-line no-nested-ternary
   logger.debug(JSON.stringify(deepmerge(extractCachedItem(cachedItem), stripper), null, 2));
 };
