@@ -64,6 +64,7 @@
     "apollo-cache-inmemory": "1.6.1",
     "apollo-client": "2.6.1",
     "apollo-link-http": "1.5.14",
+    "deepmerge": "4.0.0",
     "dotenv": "8.0.0",
     "epsagon": "1.31.7",
     "esm": "3.2.25",
