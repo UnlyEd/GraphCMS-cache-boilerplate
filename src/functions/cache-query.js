@@ -11,12 +11,14 @@ import { generateRedisKey, getClient } from '../utils/redis';
 const logger = createLogger({
   label: 'Cache handler',
 });
+let redisClient = getClient(); // XXX Init redis connection from outside the lambda handler in order to share the connection - See https://www.jeremydaly.com/reuse-database-connections-aws-lambda/
 
 /**
- * This cache endpoint is meant to never fail and always return the data from the cache, for a given query.
+ * This cache endpoint is meant to be resilient and always return the data from either the redis cache,
+ * or fallback to GCMS API if the value isn't found in the cache, or if redis is down (outage).
  *
  * Cache resolution algorithm:
- *  - Fetch an existing value for the given query, from the cache
+ *  - Fetch the value indexed by the query (index is composed of query body and headers), from the redis cache
  *    - If an existing value exists, then returns it
  *    - If not, then execute the query on GraphCMS endpoint
  *      - Once the query results are received, store them in the cache, using the query (string) as key
@@ -32,13 +34,12 @@ export const cacheQuery = async (event, context) => {
   logger.debug('Lambda "cacheQuery" called.');
   const _headers = event.headers; // Contains all headers sent by the client
   const forwardedHeaders = extractHeadersToForward(_headers); // Contains only the headers meant to be forwarded with the GCMS query
-  let redisClient;
 
+  // Override redis client when testing, to provide potentially different credentials
   if (process.env.NODE_ENV === 'test') {
     redisClient = getClient(event.__TEST_REDIS_URL || process.env.REDIS_URL, event.__TEST_REDIS_PASSWORD || process.env.REDIS_PASSWORD, 1);
-  } else {
-    redisClient = getClient();
   }
+
   const body = get(event, 'body'); // The body contains the GraphCMS query, as a string (respect GraphCMS API standards)
   const redisKey = generateRedisKey(body, forwardedHeaders);
   epsagon.label('body', body); // We store the query in Epsagon logging so that it'll be reported if we report errors to Epsagon

@@ -9,10 +9,10 @@ import { extractDataFromRedisKey, getClient } from '../utils/redis';
 const logger = createLogger({
   label: 'Read cache',
 });
+const redisClient = getClient(); // XXX Init redis connection from outside the lambda handler in order to share the connection - See https://www.jeremydaly.com/reuse-database-connections-aws-lambda/
 
 export const readCache = async (event, context) => {
   logger.debug('Lambda "readCache" called.');
-  const redisClient = getClient();
   const queriesData = [];
   let redisKeys;
 

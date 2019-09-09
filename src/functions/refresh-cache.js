@@ -4,15 +4,15 @@ import map from 'lodash.map';
 import { headerAuthentication, noTokenProvidedMessage } from '../utils/auth';
 import { updateItemInCache } from '../utils/cache';
 import epsagon from '../utils/epsagon';
+import { handleGraphCMSCompatibleErrorResponse, makeQueryHumanFriendly, runQuery } from '../utils/graphql';
 import { extractDataFromRedisKey, getClient } from '../utils/redis';
 import { wait } from '../utils/timers';
-import { handleGraphCMSCompatibleErrorResponse, makeQueryHumanFriendly, runQuery } from '../utils/graphql';
-
 
 const logger = createLogger({
   label: 'Refresh cache',
 });
 
+const redisClient = getClient(); // XXX Init redis connection from outside the lambda handler in order to share the connection - See https://www.jeremydaly.com/reuse-database-connections-aws-lambda/
 export const gcmsWebhookTokenKey = 'GraphCMS-WebhookToken';
 
 /**
@@ -28,7 +28,6 @@ export const gcmsWebhookTokenKey = 'GraphCMS-WebhookToken';
  */
 export const refreshCache = async (event, context) => {
   logger.debug('Lambda "refreshCache" called.');
-  const redisClient = getClient();
 
   if (!headerAuthentication(event.headers)) {
     logger.debug('Caller is not authorized to connect, an error will now be sent to the client.', 'FATAL');
