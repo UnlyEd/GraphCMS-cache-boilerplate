@@ -39,7 +39,7 @@
     "remove:demo:production": "NODE_ENV=production sls remove -s demo",
     "info:demo": "NODE_ENV=staging sls info -s demoStaging",
     "info:demo:production": "NODE_ENV=production sls info -s demo",
-    "preversion": "yarn doc:toc && yarn lint && yarn test:once",
+    "preversion": "yarn doc:toc && yarn lint:once && yarn test:once",
     "release": "yarn bump --prompt --commit --tag && git add CHANGELOG.md README.md && git commit --amend --no-edit && git push && git push --tags",
     "doc:toc": "yarn markdown-toc --maxdepth 4 -i README.md",
     "sync:fork": "BRANCH=${BRANCH:-master}; git pull --rebase git@github.com:UnlyEd/GraphCMS-cache-boilerplate.git ${BRANCH}",
