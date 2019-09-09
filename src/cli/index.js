@@ -3,8 +3,7 @@ import inquirer from 'inquirer';
 import logSymbols from 'log-symbols';
 
 import { querySchemaData, querySchemaData2 } from '../../gql/querySchema';
-
-const { exit, refreshCache, sendQuery } = require('./commandsHandler');
+import { exit, refreshCache, resetCache, sendQuery } from './commandsHandler';
 
 const logger = createLogger({
   label: 'Cache handler',
@@ -43,6 +42,12 @@ const promptObj = {
       name: 'Refresh all cache',
       value: 'refresh-cache',
       callback: refreshCache,
+      args: [],
+    },
+    {
+      name: 'Reset all cache',
+      value: 'reset-cache',
+      callback: resetCache,
       args: [],
     },
     {
