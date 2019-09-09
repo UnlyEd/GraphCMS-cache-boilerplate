@@ -1,6 +1,11 @@
 CHANGELOG
 ===
 
+- v2.1.1 - 2019-09-09
+    - [Enhancement] CLI - Reset cache - A new action is available in the CLI and allow to simulate the /reset-cache endpoint
+    - [Enhancement] The /cache-query endpoint prints additional debug information regarding fetched items from Redis cache
+    - [Enhancement] Changed `yarn lint` to run in watch mode by default, added a new `yarn lint:once` for CI
+    - [Enhancement] Run `yarn lint` automatically when running `yarn start` for development env
 - v2.1.0 - 2019-09-07 - [Public release](https://github.com/UnlyEd/GraphCMS-cache-boilerplate), internally forked for our private use @Unly - _Boilerplate will be maintained from now on_ 
     - [Enhancement] Headers forwarding - Now forwards some headers alongside the GCMS query. Forwarded headers are:
         - All headers starting with `gcms-`

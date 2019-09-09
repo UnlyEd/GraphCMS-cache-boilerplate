@@ -81,7 +81,7 @@ Using this service instead of directly hitting a GraphCMS endpoint provides the 
 <!-- toc -->
 
 - [Getting started](#getting-started)
-  * [_How do I configure my app that currently queries GCMS API directly, and use my newly created cache service instead?_](#_how-do-i-configure-my-app-that-currently-queries-gcms-api-directly-and-use-my-newly-created-cache-service-instead_)
+  * [_"How do I configure my app that currently queries GCMS API directly, and use my newly created cache service instead?"_](#_how-do-i-configure-my-app-that-currently-queries-gcms-api-directly-and-use-my-newly-created-cache-service-instead_)
 - [Cache workflow, and cache invalidation strategies](#cache-workflow-and-cache-invalidation-strategies)
   * [Cache behaviour](#cache-behaviour)
     + [Cache strategy](#cache-strategy)
