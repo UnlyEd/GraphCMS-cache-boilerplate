@@ -9,6 +9,7 @@ const logger = createLogger({
 
 const cacheQueryRoute = '/cache-query';
 const refreshCacheRoute = '/refresh-cache';
+const resetCacheRoute = '/reset-cache';
 
 if (!process.env.CACHE_BASE_URL) {
   logger.info(`${logSymbols.error} No "CACHE_BASE_URL" defined as environment variable, please make sure you've defined "CACHE_BASE_URL" in the .env.${process.env.NODE_ENV} file.`);
@@ -65,6 +66,28 @@ export async function refreshCache() {
     map(result.errors, (e, index) => logger.error(`  - [${index}] "${e.message}"`));
   } else {
     logger.info(`${logSymbols.success} OK - Cached queries were refreshed`);
+    logger.info(`${logSymbols.info} Result:\n${JSON.stringify(result, null, 2)}`);
+  }
+}
+
+export async function resetCache() {
+  const url = process.env.CACHE_BASE_URL + resetCacheRoute;
+  const options = { method: 'POST', headers: { 'GraphCMS-WebhookToken': process.env.REFRESH_CACHE_TOKEN } };
+
+  logger.debug(`Sending [${options.method}] "${url}" with headers "${JSON.stringify(options.headers)}"`);
+  const result = await fetch(url, options)
+    .then((res) => res.json())
+    .catch((e) => {
+      logger.debug(`An unexpected error happened while fetching "${url}".`);
+      logger.error(e);
+      throw e;
+    });
+
+  if (result.errors) {
+    logger.error(`${result.errors.length} error(s) were returned by "${url}":`);
+    map(result.errors, (e, index) => logger.error(`  - [${index}] "${e.message}"`));
+  } else {
+    logger.info(`${logSymbols.success} OK - Cache was reset/wiped`);
     logger.info(`${logSymbols.info} Result:\n${JSON.stringify(result, null, 2)}`);
   }
 }
