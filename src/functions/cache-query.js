@@ -3,11 +3,10 @@ import get from 'lodash.get';
 import map from 'lodash.map';
 
 import { eventExample } from '../constants';
-import { addItemToCache, extractQueryResultsFromItem } from '../utils/cache';
+import { addItemToCache, extractQueryResultsFromItem, printCachedItem } from '../utils/cache';
 import epsagon from '../utils/epsagon';
 import { extractHeadersToForward, handleGraphCMSCompatibleErrorResponse, runQuery } from '../utils/graphql';
 import { generateRedisKey, getClient } from '../utils/redis';
-
 
 const logger = createLogger({
   label: 'Cache handler',
@@ -50,6 +49,8 @@ export const cacheQuery = async (event, context) => {
     query = JSON.parse(body);
     epsagon.label('query', query);
     logger.debug('The body was parsed successfully into a GraphCMS query.');
+    logger.debug(`OperationName: "${query.operationName}"`);
+    logger.debug(`Forwarded headers: ${JSON.stringify(forwardedHeaders)}`);
   } catch (e) {
     // XXX If we can't parse the query, then we immediately return an error, since it is considered as a FATAL error from which we can't do anything
     logger.debug('An error occurred when parsing the body, an error will now be sent to the client.', 'FATAL');
@@ -78,7 +79,11 @@ export const cacheQuery = async (event, context) => {
 
   // If the query is cached, return the results from the cache
   if (cachedItem) {
-    logger.debug(`The query was found in the redis cache, cached result will be sent to client.`);
+    logger.debug(`The query was found in the redis cache, here is the item from the redis cache (you can customise this output for debug purpose):`);
+    // Change true/false to see the full dataset returned by the cache (for debug) - Or use a custom object to strip specific keys
+    printCachedItem(cachedItem, true);
+
+    logger.debug(`The cached result will now be sent to client.`);
     return {
       statusCode: 200,
       body: JSON.stringify(
