@@ -1,8 +1,8 @@
 {
   "name": "gcms-cache-boilerplate",
-  "version": "2.1.2",
   "description": "",
-  "license": "ISC",
+  "license": "MIT",
+  "version": "2.1.2",
   "scripts": {
     "sls:dotenv": "NODE_ENV=${NODE_ENV:-development}; sls dotenv",
     "sls:login": "serverless login",
