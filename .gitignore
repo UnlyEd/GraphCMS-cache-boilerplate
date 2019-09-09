@@ -65,10 +65,19 @@ fabric.properties
 ### WebStorm Patch ###
 # Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
 
-# *.iml
-# modules.xml
-# .idea/misc.xml
-# *.ipr
+# XXX I don't like that patch, this project is meant to be forker/cloned and therefore renamed,
+#  tracking those files messes up forks when this boilerplate's config is changed
+*.iml
+modules.xml
+.idea/misc.xml
+*.ipr
+$CACHE_FILE$
+
+# Don't track plugin config
+markdown-navigator.xml
+
+# Don't track code style, as forks may update them and we shouldn't enforce code style from the IDE
+.idea/codeStyles
 
 # Sonarlint plugin
 .idea/sonarlint
