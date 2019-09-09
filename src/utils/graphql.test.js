@@ -1,7 +1,5 @@
 import { eventExample } from '../constants';
-import {
-  buildGraphCMSError, extractHeadersToForward, handleGraphCMSCompatibleErrorResponse, makeQueryHumanFriendly, runQuery,
-} from './graphql';
+import { buildGraphCMSError, extractHeadersToForward, handleGraphCMSCompatibleErrorResponse, makeQueryHumanFriendly, runQuery } from './graphql';
 
 describe('utils/graphql.js', () => {
   describe('runQuery', () => {
