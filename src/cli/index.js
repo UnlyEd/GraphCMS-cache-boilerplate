@@ -3,8 +3,7 @@ import inquirer from 'inquirer';
 import logSymbols from 'log-symbols';
 
 import { querySchemaData, querySchemaData2 } from '../../gql/querySchema';
-
-const { exit, refreshCache, resetCache, sendQuery } = require('./commandsHandler');
+import { exit, refreshCache, resetCache, sendQuery } from './commandsHandler';
 
 const logger = createLogger({
   label: 'Cache handler',
