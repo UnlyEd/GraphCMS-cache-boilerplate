@@ -1,6 +1,8 @@
 CHANGELOG
 ===
 
+- v2.1.2 - 2019-09-09
+    - [Enhancement] Reuse redis connections for the same lambda container - _A new Redis connection was created at every lambda call before_ 
 - v2.1.1 - 2019-09-09
     - [Enhancement] CLI - Reset cache - A new action is available in the CLI and allow to simulate the /reset-cache endpoint
     - [Enhancement] The /cache-query endpoint prints additional debug information regarding fetched items from Redis cache
