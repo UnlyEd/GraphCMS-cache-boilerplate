@@ -1,6 +1,8 @@
 CHANGELOG
 ===
 
+- v2.1.3 - 2019-09-12
+    - [Enhancement] Check for `NetworkStatus.ready` instead of `queryResults.errors` (as status already handle those, clearer/proper) when analysing apollo client query result
 - v2.1.2 - 2019-09-09
     - [Enhancement] Reuse redis connections for the same lambda container - _A new Redis connection was created at every lambda call before_ 
 - v2.1.1 - 2019-09-09
