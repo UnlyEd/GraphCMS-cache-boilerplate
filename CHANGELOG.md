@@ -1,6 +1,8 @@
 CHANGELOG
 ===
 
+- v2.1.4 - 2019-09-12
+    - [Enhancement] Fix `emulate:demo:production` script - _Wasn't using production environment_
 - v2.1.3 - 2019-09-12
     - [Enhancement] Check for `NetworkStatus.ready` instead of `queryResults.errors` (as status already handle those, clearer/proper) when analysing apollo client query result
 - v2.1.2 - 2019-09-09
