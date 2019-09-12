@@ -24,7 +24,7 @@
     "deploy:demo": "NODE_ENV=staging sls deploy -s demoStaging",
     "deploy:demo:production": "NODE_ENV=production sls deploy -s demo",
     "emulate:demo": "NODE_ENV=staging yarn sls:dotenv -s demoStaging && node -r esm -r dotenv/config src/cli/index.js dotenv_config_path=./.serverless/.env",
-    "emulate:demo:production": "NODE_ENV=staging yarn sls:dotenv -s demo && node -r esm -r dotenv/config src/cli/index.js dotenv_config_path=./.serverless/.env",
+    "emulate:demo:production": "NODE_ENV=production yarn sls:dotenv -s demo && node -r esm -r dotenv/config src/cli/index.js dotenv_config_path=./.serverless/.env",
     "logs:demo:cache-query": "NODE_ENV=staging sls logs -f cache-query -s demoStaging",
     "logs:demo:cache-query:production": "NODE_ENV=production sls logs -f cache-query -s demo",
     "logs:demo:refresh-cache": "NODE_ENV=staging sls logs -f refresh-cache -s demoStaging",
