@@ -1,4 +1,5 @@
 import { createLogger } from '@unly/utils-simple-logger';
+import { NetworkStatus } from 'apollo-client';
 import map from 'lodash.map';
 
 import { headerAuthentication, noTokenProvidedMessage } from '../utils/auth';
@@ -76,7 +77,8 @@ export const refreshCache = async (event, context) => {
   const failedResults = [];
 
   map(queriesResults, (queryResult, index) => {
-    if (queryResult.errors) {
+    // XXX If the query failed (whether completely or partially), we don't update the cache
+    if (queryResult.networkStatus !== NetworkStatus.ready) { // See https://github.com/apollographql/apollo-client/blob/master/packages/apollo-client/src/core/networkStatus.ts
       // When a query returns an error, we don't update the cache
       epsagon.setError(Error(`Cache refresh failed with "${JSON.stringify(queryResult.errors)}"`));
       logger.error(JSON.stringify(queryResult.errors, null, 2), 'graphcms-query-error');
