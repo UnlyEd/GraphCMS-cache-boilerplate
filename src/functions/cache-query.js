@@ -1,4 +1,5 @@
 import { createLogger } from '@unly/utils-simple-logger';
+import { NetworkStatus } from 'apollo-client';
 import get from 'lodash.get';
 import map from 'lodash.map';
 
@@ -119,12 +120,10 @@ export const cacheQuery = async (event, context) => {
       };
     }
 
-    // XXX GraphCMS returns an array of "errors" when errors happen, even if there was only one error thrown
-    const queryErrors = get(queryResults, 'errors', []);
-
     // XXX If a GraphCMS query returns any kind of error we don't add it to the cache, to avoid storing persistent data that aren't reliable
-    //  So, we only cache data when they're reliable, to avoid
-    if (!queryErrors.length) {
+    //  So, we only cache data when they're reliable, to avoid storing data that may not be reliable
+    //  (and allow owner to fix it from GCMS, thus ensuring proper caching the next time that query is executed)
+    if (queryResults.networkStatus === NetworkStatus.ready) { // See https://github.com/apollographql/apollo-client/blob/master/packages/apollo-client/src/core/networkStatus.ts
       // If the query was executed successfully, update the cache
       // XXX Asynchronous on purpose - Do not wait for the cache to be updated before returning the query results (perf++)
       addItemToCache(redisClient, body, forwardedHeaders, queryResults)
@@ -140,15 +139,21 @@ export const cacheQuery = async (event, context) => {
           logger.error(message);
           epsagon.setError(Error(error));
         });
+      logger.debug(`The GraphCMS query was executed successfully. Results are now sent to the client.`);
+
     } else {
+      // XXX GraphCMS returns an array of "errors" when errors happen, even if there was only one error thrown
+      //  The error may be partial, or fatal (there may be data fetched, alongside errors, or just errors with no data)
+      const queryErrors = get(queryResults, 'errors', []);
+
       map(queryErrors, (gcmsError) => {
-        const error = `An error occurred on GraphCMS when running the query, the results were therefore not cached to avoid storing non-reliable information. \nGraphCMS Error: "${gcmsError.message}"`;
+        const error = `Response status: "${queryResults.networkStatus}" - An error occurred on GraphCMS when running the query, the results were therefore not cached to avoid storing non-reliable information. \nGraphCMS Error: "${gcmsError.message}"`;
         logger.error(error);
         epsagon.setError(Error(error));
       });
       logger.debug(`Full GraphCMS API response: \n${JSON.stringify(queryResults, null, 2)}`);
+      logger.debug(`The GraphCMS query returned one or more errors. Results are now sent to the client.`);
     }
-    logger.debug(`The GraphCMS query was executed successfully. Results are now sent to the client.`);
 
     // XXX Will return the value ASAP (don't wait for the cache to be updated)
     //  If the query failed, will return the results anyway, because it's possible for a GraphQL query to partially fail, but yield results anyway
