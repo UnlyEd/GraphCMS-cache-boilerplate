@@ -140,7 +140,6 @@ export const cacheQuery = async (event, context) => {
           epsagon.setError(Error(error));
         });
       logger.debug(`The GraphCMS query was executed successfully. Results are now sent to the client.`);
-
     } else {
       // XXX GraphCMS returns an array of "errors" when errors happen, even if there was only one error thrown
       //  The error may be partial, or fatal (there may be data fetched, alongside errors, or just errors with no data)
