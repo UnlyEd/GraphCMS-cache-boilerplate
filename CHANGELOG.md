@@ -1,6 +1,8 @@
 CHANGELOG
 ===
 
+- v2.1.5 - 2019-09-25
+    - [Enhancement] Improve stability/resilience of /reset-cache endpoint, better handle redis errors - Doesn't spawn one redis connection per call anymore, more resilient to calls received in a batch as well (forces 1 reset max every ~10s)
 - v2.1.4 - 2019-09-12
     - [Enhancement] Fix `emulate:demo:production` script - _Wasn't using production environment_
 - v2.1.3 - 2019-09-12
