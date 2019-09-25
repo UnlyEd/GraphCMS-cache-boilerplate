@@ -35,7 +35,8 @@ export const getClient = (url = process.env.REDIS_URL, password = process.env.RE
   // Handles redis connection temporarily going down without app crashing
   // If an error is handled here, then redis will attempt to retry the request based on maxRetriesPerRequest
   client.on('error', (e) => {
-    logger.error(`Error connecting to redis: "${e}"`);
+    logger.error(`Unexpected error from redis client: "${e}"`);
+    logger.error(e);
     epsagon.setError(e);
   });
 
