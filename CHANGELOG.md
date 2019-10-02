@@ -1,6 +1,8 @@
 CHANGELOG
 ===
 
+- v2.1.6 - 2019-10-02
+    - [Enhancement] Handle CORS preflight request - Before today, it wasn't possible to send POST requests to the `/cache-query` endpoint due to CORS preflight check that wasn't allowed. We didn't previously encounter the issue because we were using the same domain/sub-domain. Now, it's possible to connect to the Cache from any domain
 - v2.1.5 - 2019-09-25
     - [Enhancement] Improve stability/resilience of /reset-cache endpoint, better handle redis errors - Doesn't spawn one redis connection per call anymore, more resilient to calls received in a batch as well (forces 1 reset max every ~10s)
 - v2.1.4 - 2019-09-12
