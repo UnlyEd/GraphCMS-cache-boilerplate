@@ -14,6 +14,11 @@ const logger = createLogger({
 });
 let redisClient = getClient(); // XXX Init redis connection from outside the lambda handler in order to share the connection - See https://www.jeremydaly.com/reuse-database-connections-aws-lambda/
 
+const responseHeaders = { // XXX Necessary to make CORS requests work - See https://serverless.com/blog/cors-api-gateway-survival-guide/
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Credentials': false,
+};
+
 /**
  * This cache endpoint is meant to be resilient and always return the data from either the redis cache,
  * or fallback to GCMS API if the value isn't found in the cache, or if redis is down (outage).
@@ -62,6 +67,7 @@ export const cacheQuery = async (event, context) => {
     // We return the error message directly, to help with debug (and it's not sensitive)
     return {
       statusCode: 500,
+      headers: responseHeaders,
       body: handleGraphCMSCompatibleErrorResponse(`Could not parse the given query, please provide a proper GraphCMS query as "request body". (hint: Body must contain "operationName", "variables" and "query" properties, as a stringified JSON object, such as "${eventExample.body}") \nRequest body: "${body}"`),
     };
   }
@@ -88,6 +94,7 @@ export const cacheQuery = async (event, context) => {
     logger.debug(`The cached result will now be sent to client.`);
     return {
       statusCode: 200,
+      headers: responseHeaders,
       body: JSON.stringify(
         extractQueryResultsFromItem(cachedItem),
       ),
@@ -116,6 +123,7 @@ export const cacheQuery = async (event, context) => {
 
       return {
         statusCode: 500,
+        headers: responseHeaders,
         body: handleGraphCMSCompatibleErrorResponse(String(e)),
       };
     }
@@ -159,6 +167,7 @@ export const cacheQuery = async (event, context) => {
     //  (it can contains both "data" and "errors") - See https://blog.apollographql.com/full-stack-error-handling-with-graphql-apollo-5c12da407210
     return {
       statusCode: 200,
+      headers: responseHeaders,
       body: JSON.stringify(queryResults),
     };
   }

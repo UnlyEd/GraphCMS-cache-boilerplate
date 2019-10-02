@@ -8,7 +8,7 @@ const logger = createLogger({ // eslint-disable-line no-unused-vars
   label: 'GraphQL utils',
 });
 
-export const GCMS_HEADER_PREFIX = 'gcms-'; // Headers matching this prefix are meant to be forwarded
+export const GCMS_HEADER_PREFIX = 'gcms-'; // Headers matching this prefix are meant to be forwarded XXX Headers will be automatically forwarded, but if you're subject to CORS requests, then you'll need to manually allow them in serverless.yml for "cache-query" lambda
 export const GCMS_HEADERS_WHITELIST = [ // Whitelist of specific headers meant to be forwarded
   'locale', // Keep "locale" header, for backward-compatibility with GCMS previous versions
 ];
