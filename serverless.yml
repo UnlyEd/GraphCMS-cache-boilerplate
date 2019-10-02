@@ -88,7 +88,20 @@ functions:
       - http:
           method: POST
           path: /cache-query
-          cors: true
+          cors: # XXX See https://serverless.com/blog/cors-api-gateway-survival-guide/
+            origin: '*' # Same as "Access-Control-Allow-Origin"
+            headers: # Same as "Access-Control-Allow-Headers"
+              # Standard default headers
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              # Additional headers - Specific to this app
+              - gcms-locale
+              - gcms-locale-no-default
+            allowCredentials: false
 
   reset-cache:
     handler: src/functions/epsagon.resetCache
