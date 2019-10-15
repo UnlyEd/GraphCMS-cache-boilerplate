@@ -2,9 +2,9 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/8fdeb19d924c1e617e45/test_coverage)](https://codeclimate.com/github/UnlyEd/GraphCMS-cache-boilerplate/test_coverage)
 [![AWS CodeBuild](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiTURJRG1RT0taenZITE5RV1lPTWM0WGpZTUZPQWpNTUg3WE1NWFhWOGhrL0lkblpyWWczMVVjWkdSeUw1VldLQll1VURBMTlmSjc0VXpTOTU2SWpKUlFBPSIsIml2UGFyYW1ldGVyU3BlYyI6Im9vQjk4cWprWE9yOWNOUVQiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)](https://eu-west-1.console.aws.amazon.com/codesuite/codebuild/projects/GraphCMS-cache-boilerplate)
 
-# GraphCMS Cache Contingency service
+# GraphCMS/GraphQL Cache Contingency service
 
-> The main goal of this service is to provide a **reliable cache contingency backup plan** in case a GraphCMS endpoint is failing.
+> The main goal of this service is to provide a **reliable cache contingency backup plan** in case a GraphQL endpoint is failing.
 This service most important priority is the **service reliability**, not the **data consistency**, which may not always be up-to-date.
 >
 > This Cache service is meant to run **on your own AWS account**, and be managed **by yourself**. 
@@ -22,18 +22,19 @@ This service most important priority is the **service reliability**, not the **d
 ### _"Why/when should I use this?"_
 
 - _"I don't use [GraphCMS](https://graphcms.com/), is this any useful to me?"_: 
-    - **No**, it's likely not. 
-    This service is meant to be a proxy server between you apps and your GraphCMS API endpoint. 
-    It's completely useless if you don't use GraphCMS in the first place.
+    - **It may be**. 
+    This service is meant to be a proxy server between you apps and your GraphQL API endpoint. 
+    It's completely useless if you don't use GraphQL in the first place. (GraphCMS relies on GraphQL)
+    **It was build with first-class GraphCMS support in mind, but it works for any GraphQL endpoint.** _The only difference between GraphQL/GraphCMS is that this project automatically forwards GraphCMS-specific HTTP headers to the GraphQL endpoint. But you can custom headers-forwarding by forking it!_
 - _"I want to protect our apps against unpredictable outages from GraphCMS (or its 3rd party services), will this help me?"_:
     - **Yes**, it will. Read on!
 - _"I want to lower our GraphCMS cost by reducing the number of calls hitting their API, will this help me?"_:
     - **Yes**, it will. Read on!
-- _"I use frontend apps (react, angular, vue, etc.) and want to hide our GraphCMS API credentials that are currently visible in the browser source code, will this help me?"_:
+- _"I use frontend apps (react, angular, vue, etc.) and want to hide our GraphQL API credentials that are currently visible in the browser source code, will this help me?"_:
     - **Yes**, it will. Read on!
-- _"I want to improve the performance of our apps that rely on GraphCMS API, will this help me?"_:
+- _"I want to improve the performance of our apps that rely on GraphQL API, will this help me?"_:
     - **Yes**, it will. Read on!
-- _"I want to run some automated data transformations after fetching those from GraphCMS API, will this help me?"_:
+- _"I want to run some automated data transformations after fetching those from GraphQL API, will this help me?"_:
     - It **could**, but it's not the main purpose. 
     It could be a good place to start though, give it a try and see for yourself!
 - _"I'm just looking for something simple to setup that will just act as a temporary cache (caching mechanism on a limited period), is this still for me?"_:
@@ -42,7 +43,7 @@ This service most important priority is the **service reliability**, not the **d
 - _"I'm running a multi-tenants business, can you help about that?"_:
     - **Yes**, we do. We also run a multi-tenants business, meaning we have a dedicated service _(AWS Lambda, API GW, Redis instance, domain name)_ **for each of our customers**.
     We therefore provide easy-to-use scripts, which allow you to manage each of those services from a centralised point.
-    The only common point between the customers is that they all depend on the same GraphCMS API endpoint. _(and, if that's not your case, you could change that quite simply!)_
+    The only common point between the customers is that they all depend on the same GraphQL API endpoint. _(and, if that's not your case, you could change that quite simply!)_
 
 ### _"How should I use it?"_
 
@@ -57,23 +58,23 @@ This service most important priority is the **service reliability**, not the **d
 ---
 ## Benefits
 
-Using this service instead of directly hitting a GraphCMS endpoint provides the following benefits:
+Using this service instead of directly hitting a GraphQL endpoint provides the following benefits:
 
-1. **Contingency backup plan for a GraphCMS endpoint**: 
-    If a GCMS endpoint is failing (whether it's a bug, planned maintenance, etc.), then all customers would be affected at once (app crash, etc.).
-    As we cannot let this happen for obvious reasons, the goal of this contingency cache is to take over if GCMS is failing, using a redis cache to return data cached by a previous request instead of crashing the app.
+1. **Contingency backup plan for a GraphQL endpoint**: 
+    If a GraphQL endpoint is failing (whether it's a bug, planned maintenance, etc.), then all customers would be affected at once (app crash, etc.).
+    As we cannot let this happen for obvious reasons, the goal of this contingency cache is to take over if GraphQL is failing, using a redis cache to return data cached by a previous request instead of crashing the app.
 1. **Auth proxy**: 
     Also, this service acts as a proxy, and can be used to hide authentication credentials from the client (front-end apps).
-    This way, credentials such as GCMS API token are only used here, from this service, on the server side, and are therefore safe.
-1. **Cost mitigation**: 
+    This way, credentials such as GraphQL credentials (know as "API token" on GraphCMS) are only used here, from this service, on the server side, and are therefore **safe**.
+1. **Cost mitigation** _(for GraphCMS, or any provider that bills you based on the inbound/outbound of data and API requests)_: 
     As we won't hit the GCMS API directly, but most requests are gonna be cached, the GraphCMS usage cost will decrease.
     On the other hand, additional costs from the AWS Lambda, API Gateway and redis will apply. (but it's much less expensive)
     **Additionally**, as you limit the number of requests that are handled by GraphCMS, you can go over your plan limit without suffering from your endpoint to be taken down (free plans, for instance, are automatically taken down when over limit).
     If you use a free plan to serve real customers, this service will allow you to increase your applications reliability and serve even more customers before upgrading your plan.
 1. **Performances**: 
-    As we don't run a whole GraphCMS query every time but just return cached results, this has benefits on performances (mostly network speed).
+    As we don't run a whole GraphQL query every time but just return cached results, this has benefits on performances (mostly network speed).
 1. **Additional data processing**: 
-    As this service acts as a proxy, it could also perform additional data processing, such as aggregations, that aren't available natively with GraphCMS.
+    As this service acts as a proxy, it could also perform additional data processing, such as aggregations, that aren't available natively with GraphQL.
     _This is a possibility, but not the main purpose. And it's out of the scope for now, but could come in handy later._
 
 ---
@@ -131,7 +132,7 @@ Using this service instead of directly hitting a GraphCMS endpoint provides the 
 
 Watch this 10mn video to understand and see it in action!
 
-[![GraphCMS Cache COntingency in action](https://img.youtube.com/vi/k4Bd-XHmiBM/0.jpg)](https://youtu.be/k4Bd-XHmiBM)
+[![GraphCMS Cache Contingency in action](https://img.youtube.com/vi/k4Bd-XHmiBM/0.jpg)](https://youtu.be/k4Bd-XHmiBM)
 
 Clone the repo, then configure your local install:
 
@@ -262,10 +263,10 @@ Much simpler and fixes several downsides suffered by Strategy 1, such as:
 **Known limitations**:
 - Because there is no automated refill of the cache, it will be filled when a customer performs an action that generate a query.
 If that query is rarely executed, it may happen that it's executed during an outage, and the query would therefore fail, potentially crashing your app.
-- If the cache reset happens during a GCMS outage, then your app will crash anyway. We don't check that GCMS is up and running before performing the cache reset.
+- If the cache reset happens during a GCMS outage, then your app will crash anyway. **We don't check that GCMS is up and running before performing the cache reset.** _(but that'd be awesome, once they provide a way to do that!)_
 
     **Contributor help needed!**: If you know a way to detect GraphCMS status and therefore avoid a cache reset during an outage, we're very interested.
-    To our knowledge, they don't have any automated too we could rely on to detect this before wiping all the data from the cache, but that'd definitely be a nice addition! 
+    To our knowledge, they don't have any automated too we could rely on to detect this before wiping all the data from the cache, but that'd definitely be an awesome addition! 
 
 
 #### Alternative strategy - Refresh the cache automatically by making it temporary
@@ -299,7 +300,7 @@ Here, the `operationName` is `null`.
 But if you specify it (`query myQueryName {}`) then it will reflect in the `operationName`, 
 and this field is also used **to index** the query in redis.
 
-So, if you wanted to to automatically invalidate your cache every hour, you could just make the `operationName` dynamic, 
+So, if you wanted to automatically invalidate your cache every hour, you could just make the `operationName` **dynamic**, 
 such as `query myQueryName_01_01_2019_11am {}`.
 This way, since the value would change every hours, a different GraphQL query would be sent every hour, 
 and the key used by redis would therefore be different every hours, leading to a cache refresh because the newer query would actually be executed on GraphCMS API before being cached.
@@ -312,7 +313,7 @@ But that's still nice to know, and perfectly fit a "simple cache strategy" use-c
 #### Strategy X - Open an issue if you'd like to either implement or request another strategy!
 
 > Disclaimer: We'll likely not have the time to add another strategy if we don't need it ourselves.
-> But, feel free to open an issue and let's discuss it, we'll gladly advise you regarding the implementation details and discuss it together.
+> But, feel free to open an issue and let's discuss it, we'll gladly advise you regarding the implementation details and discuss the specs together.
 
 ### Cache version history
 
