@@ -117,7 +117,9 @@ coverage/
 !.env.test
 
 secrets-*.yml
-!secrets-staging.yml
+!secrets-example.yml
+!secrets-development.yml
+!secrets-test.yml
 
 # Epsagon generated files
 epsagon_handlers/

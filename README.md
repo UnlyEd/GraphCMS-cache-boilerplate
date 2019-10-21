@@ -41,7 +41,7 @@ This service most important priority is the **service reliability**, not the **d
     - **Yes**, this project provides many benefits/features, but it's possible to only use it as a **temporary caching mechanism** _(instead of cache contingency as it was meant to be at the beginning)_.
     See [Alternative strategy - Refresh the cache automatically by making it temporary](#alternative-strategy---refresh-the-cache-automatically-by-making-it-temporary)
 - _"I'm running a multi-tenants business, can you help about that?"_:
-    - **Yes**, we do. We also run a multi-tenants business, meaning we have a dedicated service _(AWS Lambda, API GW, Redis instance, domain name)_ **for each of our customers**.
+    - **Yes**, we do. We also run a multi-tenants business, meaning we have a dedicated service _(AWS Lambda, API GW, Redis instance, domain name)_ **for each of our customers/instances**.
     We therefore provide easy-to-use scripts, which allow you to manage each of those services from a centralised point.
 
 ### _"How should I use it?"_
@@ -458,10 +458,10 @@ Epsagon will [automatically be disabled](./src/utils/epsagon.js) if you don't pr
 ## Advanced notions
 
 ### Multi customer instances
-This service also support the deployment and management of multiple redis caches - one per customer.
+This service also support the deployment and management of multiple redis caches - one per customer (AKA "an instance").
 
 Basically, it allow to spawn multiple Cache services, with each its own Redis connection and own GraphCMS/GraphQL connection.
-_You could also re-use credentials and token to re-use the same redis connection for several customers, although it's not what we recommend, it's up to you._
+_You could also re-use credentials and token to re-use the same redis connection for several instances, although it's not what we recommend, it's up to you._
 
 Therefore, each instance is completely separated from others, with its own redis cache, its own Lambda and own API Gateway.
 It not more expensive either (_assuming you're using a free RedisLabs plan and thus ignoring Redis's costs_), since the AWS infrastructure is on-demand it'd cost the same whether all the load is on one lambda, or separated on multiple lambdas
@@ -550,7 +550,8 @@ As we run on a Free plan, there are a few limitations to consider:
 > This way, you will avoid edge cases such as:
 > - CustomerA triggering too many connections, which would take down CustomerD.
 > - Adding a CustomerZ, which caches a bit more data that goes over the 30MB limit, hence impacting all your customers.
-> - Trigger a cache refresh will refresh all queries, without knowledge of "to whom" belongs the query/data, which may likely not be what you want. 
+> - Trigger a cache refresh will refresh all queries, without knowledge of "to whom" belongs the query/data, which may likely not be what you want.
+>
 >   Using a dedicated redis instance per customer fixes that too.
 
 ### Select Subscription plan
@@ -578,13 +579,6 @@ A redis instance can be configured with those values:
 - `volatile-random`: randomly evicts keys with an "expire" field set
 
 > The recommended choice is `allkeys-lfu`, so that the impact of re-fetching data is minimised as much as possible.
-
-#### Password
-
-> Use the same database password for all redislabs accounts that contain a redis instance related to the staging environment.
-> Same goes for production, we use the same password for all production instances.
-
-This way, it's much easier to manage (one password per environment, not one per env/customer). 
 
 ---
 
