@@ -118,6 +118,8 @@ coverage/
 
 secrets-*.yml
 !secrets-staging.yml
+!secrets-development.yml
+!secrets-test.yml
 
 # Epsagon generated files
 epsagon_handlers/
