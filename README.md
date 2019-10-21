@@ -115,7 +115,6 @@ Using this service instead of directly hitting a GraphQL endpoint provides the f
   * [Select Subscription plan](#select-subscription-plan)
   * [Database configuration](#database-configuration)
     + [Data eviction policy](#data-eviction-policy)
-    + [Password](#password)
 - [Other known limitations and considerations](#other-known-limitations-and-considerations)
 - [Changelog](#changelog)
 - [Contributing](#contributing)

@@ -1,6 +1,8 @@
 CHANGELOG
 ===
 
+- v2.2.1 - 2019-10-21
+    - [Enhancement] Implement a better per-instance configuration, the previous one caused a lot of copy/paste duplicated config when managing many instances
 - v2.2.0 - 2019-10-21
     - [Feature] Allow per-instance configuration, backward-compatible but it's a whole new way of defining environment variables using secrets-staging.yml and secrets-production.yml instead of .env.staging and .env.production
 - v2.1.6 - 2019-10-02
