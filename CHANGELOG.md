@@ -1,6 +1,8 @@
 CHANGELOG
 ===
 
+- v2.2.0 - 2019-10-21
+    - [Feature] Allow per-customer configuration, backward-compatible but it's a whole new way of defining environment variables using secrets-staging.yml and secrets-production.yml instead of .env.staging and .env.production
 - v2.1.6 - 2019-10-02
     - [Enhancement] Handle CORS preflight request - Before today, it wasn't possible to send POST requests to the `/cache-query` endpoint due to CORS preflight check that wasn't allowed. We didn't previously encounter the issue because we were using the same domain/sub-domain. Now, it's possible to connect to the Cache from any domain
 - v2.1.5 - 2019-09-25
