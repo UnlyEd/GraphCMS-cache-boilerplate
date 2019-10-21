@@ -9,7 +9,7 @@ This service most important priority is the **service reliability**, not the **d
 >
 > This Cache service is meant to run **on your own AWS account**, and be managed **by yourself**. 
 > It is powered by the [Serverless Framework](https://serverless.com/). 
-> It uses another 3rd party tool for monitoring the service: [Epsagon](https://epsagon.com/) _(free plan is most likely enough)_.
+> It uses _an optional_ 3rd party tool for monitoring the service: [Epsagon](https://epsagon.com/) _(free plan is most likely enough)_.
 >
 > It is a whole service meant to be used by developers/teams who rely on GraphCMS,
 > and are looking for a **safe and reliable way** to provide services to their own customers.
