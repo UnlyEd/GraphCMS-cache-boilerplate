@@ -43,7 +43,6 @@ This service most important priority is the **service reliability**, not the **d
 - _"I'm running a multi-tenants business, can you help about that?"_:
     - **Yes**, we do. We also run a multi-tenants business, meaning we have a dedicated service _(AWS Lambda, API GW, Redis instance, domain name)_ **for each of our customers**.
     We therefore provide easy-to-use scripts, which allow you to manage each of those services from a centralised point.
-    The only common point between the customers is that they all depend on the same GraphQL API endpoint. _(and, if that's not your case, you could change that quite simply!)_
 
 ### _"How should I use it?"_
 
@@ -70,7 +69,7 @@ Using this service instead of directly hitting a GraphQL endpoint provides the f
     As we won't hit the GCMS API directly, but most requests are gonna be cached, the GraphCMS usage cost will decrease.
     On the other hand, additional costs from the AWS Lambda, API Gateway and redis will apply. (but it's much less expensive)
     **Additionally**, as you limit the number of requests that are handled by GraphCMS, you can go over your plan limit without suffering from your endpoint to be taken down (free plans, for instance, are automatically taken down when over limit).
-    If you use a free plan to serve real customers, this service will allow you to increase your applications reliability and serve even more customers before upgrading your plan.
+    If you use a free GraphCMS plan to serve real customers, this service will allow you to increase your applications reliability and serve even more customers before upgrading your plan.
 1. **Performances**: 
     As we don't run a whole GraphQL query every time but just return cached results, this has benefits on performances (mostly network speed).
 1. **Additional data processing**: 
@@ -261,7 +260,7 @@ Much simpler and fixes several downsides suffered by Strategy 1, such as:
 - Eventually consumes less resources (CPU/RAM) > cheaper _(not significant)_
 
 **Known limitations**:
-- Because there is no automated refill of the cache, it will be filled when a customer performs an action that generate a query.
+- Because there is no automated refill of the cache, it will be filled when a client performs an action that generate a query.
 If that query is rarely executed, it may happen that it's executed during an outage, and the query would therefore fail, potentially crashing your app.
 - If the cache reset happens during a GCMS outage, then your app will crash anyway. **We don't check that GCMS is up and running before performing the cache reset.** _(but that'd be awesome, once they provide a way to do that!)_
 
@@ -461,14 +460,15 @@ Epsagon will [automatically be disabled](./src/utils/epsagon.js) if you don't pr
 ### Multi customer instances
 This service also support the deployment and management of multiple redis caches - one per customer.
 
-Basically, it allow to spawn multiple Cache services, with each its own Redis connection.
+Basically, it allow to spawn multiple Cache services, with each its own Redis connection and own GraphCMS/GraphQL connection.
+_You could also re-use credentials and token to re-use the same redis connection for several customers, although it's not what we recommend, it's up to you._
 
-Following this scheme makes each instance completely separated from others, with its own redis cache, its own Lambda and own API Gateway.
-It not more expensive either (assuming you're using a free RedisLabs plan), since the AWS infrastructure is on-demand it'd cost the same whether all the load is on one lambda, or separated on multiple lambdas
+Therefore, each instance is completely separated from others, with its own redis cache, its own Lambda and own API Gateway.
+It not more expensive either (_assuming you're using a free RedisLabs plan and thus ignoring Redis's costs_), since the AWS infrastructure is on-demand it'd cost the same whether all the load is on one lambda, or separated on multiple lambdas
 See [Limitations](#limitations).
 
 It would still be possible to use just one redis instance with different databases (one db per customer, but the same connection for all).
-It really depends on your Redis service. Though, spearation by clusters is not handled by our Cache system. _(feel free to open a issue and propose a PR!)_
+It really depends on your Redis service. Though, separation by clusters is not handled by our Cache system. _(feel free to open a issue and propose a PR!)_
 
 ---
 

@@ -113,10 +113,11 @@ coverage/
 # Sensitive values, do not share (development is for local personal use, not super sensitive but shouldn't be shared with the team)
 # XXX Feel free to track development/test/staging files if you wish so, it's usually not too sensitive if you split staging/production properly
 .env*
-!.env.example
 !.env.development
-!.env.staging
 !.env.test
+
+secrets-*.yml
+!secrets-staging.yml
 
 # Epsagon generated files
 epsagon_handlers/

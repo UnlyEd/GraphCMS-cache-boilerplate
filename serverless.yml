@@ -18,27 +18,60 @@ custom:
     showDuration: true
   environment: ${env:NODE_ENV, 'development'}
   envs:
-    development: # XXX Kept for compatibility but useless, development stage doesn't go to AWS
+    development: # XXX Used by both "development" and "test" environments
       profile:
       domain:
         name:
       memorySize:
       redis:
-        url:
+        url: 'localhost:6379'
+        password: 'localpass'
+      graphql:
+        endpoint: 'https://api-euwest.graphcms.com/v1/cjyi8gl5m00tm01e91polc50t/master'
+        token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJ0b2tlbklkIjoiZWI4NTg3YjUtYjZhOS00ODE4LTliYjUtNWE4NDYwYjNmN2IxIn0.UQjYshD_MXM0eN1Jx0m6ODz3bvn6f9zhSJ45pbtEXKs'
+      refreshCache:
+        token: 'oCsaDgNY6YUe7x03GY8DoIBCYdGKn2UvKnO2Vb7uYhZbdxs7UbYi2yYy23vOytSteGStUrydyhJu1nTlC8jPNdUQgaqY6NKf2Z0F'
+      basicAuth:
+        username: 'admin'
+        password: 'not-admin!'
+      epsagon:
+        token: ''
     demoStaging:
-      profile: # AWS profile to use for this environment
+      profile: # TODO AWS profile to use for this environment - Useful if your staging and production apps don't live in the same AWS Account! (which is our case)
       domain:
-        name: # your staging domain name
+        name: # TODO Your staging domain name
       memorySize: 256
       redis:
-        url: # Using redisLab, should be something like redis-aaa.aa.eu-west-1-2.ec2.cloud.redislabs.com:11111
+        url: # TODO Your staging redis endpoint url - Using redisLab, should be something like redis-aaa.aa.eu-west-1-2.ec2.cloud.redislabs.com:11111
+        password: ${file(./secrets-${self:custom.environment}.yml):demo.REDIS_PASSWORD}
+      graphql:
+        endpoint: ${file(./secrets-${self:custom.environment}.yml):demo.GRAPHCMS_ENDPOINT}
+        token: ${file(./secrets-${self:custom.environment}.yml):demo.GRAPHCMS_TOKEN}
+      refreshCache:
+        token: ${file(./secrets-${self:custom.environment}.yml):demo.REFRESH_CACHE_TOKEN}
+      basicAuth:
+        username: ${file(./secrets-${self:custom.environment}.yml):demo.BASIC_AUTH_USERNAME}
+        password: ${file(./secrets-${self:custom.environment}.yml):demo.BASIC_AUTH_PASSWORD}
+      epsagon:
+        token: ${file(./secrets-${self:custom.environment}.yml):demo.EPSAGON_APP_TOKEN}
     demo:
-      profile: # AWS profile to use for this environment - Useful if your staging and production apps don't live in the same AWS Account! (which is our case)
+      profile: # TODO AWS profile to use for this environment - Useful if your staging and production apps don't live in the same AWS Account! (which is our case)
       domain:
-        name: # your production domain name
-      memorySize: 512
+        name: # TODO Your production domain name
+      memorySize: 256
       redis:
-        url: # Using redisLab, should be something like redis-aaa.aa.eu-west-1-2.ec2.cloud.redislabs.com:11111
+        url: # TODO Your production redis endpoint url - Using redisLab, should be something like redis-aaa.aa.eu-west-1-2.ec2.cloud.redislabs.com:11111
+        password: ${file(./secrets-${self:custom.environment}.yml):demo.REDIS_PASSWORD}
+      graphql: # XXX We strongly recommend to use a distinct staging and production environments (production is at /master by default)
+        endpoint: 'https://api-euwest.graphcms.com/v1/cjyi8gl5m00tm01e91polc50t/master'
+        token: ${file(./secrets-${self:custom.environment}.yml):demo.GRAPHCMS_TOKEN}
+      refreshCache:
+        token: ${file(./secrets-${self:custom.environment}.yml):demo.REFRESH_CACHE_TOKEN}
+      basicAuth:
+        username: ${file(./secrets-${self:custom.environment}.yml):demo.BASIC_AUTH_USERNAME}
+        password: ${file(./secrets-${self:custom.environment}.yml):demo.BASIC_AUTH_PASSWORD}
+      epsagon:
+        token: ${file(./secrets-${self:custom.environment}.yml):demo.EPSAGON_APP_TOKEN}
   webpack:
     webpackConfig: 'webpack.config.js'
     includeModules:
@@ -70,6 +103,12 @@ provider:
   environment:
     NODE_ENV: ${self:custom.environment}
     REDIS_URL: ${self:custom.envs.${self:provider.stage}.redis.url, ''}
+    REDIS_PASSWORD: ${self:custom.envs.${self:provider.stage}.redis.password, ''}
+    GRAPHCMS_ENDPOINT: ${self:custom.envs.${self:provider.stage}.graphql.endpoint, ''}
+    GRAPHCMS_TOKEN: ${self:custom.envs.${self:provider.stage}.graphql.token, ''}
+    REFRESH_CACHE_TOKEN: ${self:custom.envs.${self:provider.stage}.refreshCache.token, ''}
+    BASIC_AUTH_USERNAME: ${self:custom.envs.${self:provider.stage}.basicAuth.username, ''}
+    BASIC_AUTH_PASSWORD: ${self:custom.envs.${self:provider.stage}.basicAuth.password, ''}
     EPSAGON_APP_NAME: ${self:service}-${self:provider.stage}-${self:custom.environment}
     CACHE_BASE_URL: https://${self:custom.envs.${self:provider.stage}.domain.name}
   profile: ${self:custom.envs.${self:provider.stage}.profile, ''}
