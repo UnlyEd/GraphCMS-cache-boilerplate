@@ -51,7 +51,9 @@
     "test": "NODE_ENV=test yarn sls:dotenv && yarn delete:redis ; yarn start:redis:daemon && jest --runInBand --watchAll",
     "test:noredis": "NODE_ENV=test yarn sls:dotenv && jest --runInBand --watchAll",
     "test:once": "NODE_ENV=test yarn sls:dotenv && yarn delete:redis ; yarn start:redis:daemon && jest --runInBand --detectOpenHandles --forceExit && yarn stop:redis",
-    "test:coverage": "NODE_ENV=test yarn sls:dotenv && yarn delete:redis ; yarn start:redis:daemon && jest --coverage --runInBand --detectOpenHandles --forceExit && yarn stop:redis"
+    "test:coverage": "NODE_ENV=test yarn sls:dotenv && yarn delete:redis ; yarn start:redis:daemon && jest --coverage --runInBand --detectOpenHandles --forceExit && yarn stop:redis",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "jest": {
     "setupFilesAfterEnv": [
@@ -83,7 +85,8 @@
     "moment": "2.24.0",
     "node-fetch": "2.6.0",
     "source-map-support": "0.5.12",
-    "winston": "3.2.1"
+    "winston": "3.2.1",
+    "snyk": "^1.260.0"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
@@ -114,5 +117,6 @@
     "wait-for-expect": "1.2.0",
     "webpack": "4.34.0",
     "webpack-node-externals": "1.7.2"
-  }
+  },
+  "snyk": true
 }
