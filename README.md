@@ -1,6 +1,8 @@
+<a href="https://unly.org"><img src="https://storage.googleapis.com/unly/images/ICON_UNLY.png" align="right" height="20" alt="Unly logo" title="Unly logo" /></a>
 [![Maintainability](https://api.codeclimate.com/v1/badges/8fdeb19d924c1e617e45/maintainability)](https://codeclimate.com/github/UnlyEd/GraphCMS-cache-boilerplate/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/8fdeb19d924c1e617e45/test_coverage)](https://codeclimate.com/github/UnlyEd/GraphCMS-cache-boilerplate/test_coverage)
 [![AWS CodeBuild](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiTURJRG1RT0taenZITE5RV1lPTWM0WGpZTUZPQWpNTUg3WE1NWFhWOGhrL0lkblpyWWczMVVjWkdSeUw1VldLQll1VURBMTlmSjc0VXpTOTU2SWpKUlFBPSIsIml2UGFyYW1ldGVyU3BlYyI6Im9vQjk4cWprWE9yOWNOUVQiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)](https://eu-west-1.console.aws.amazon.com/codesuite/codebuild/projects/GraphCMS-cache-boilerplate)
+[![Known Vulnerabilities](https://snyk.io/test/github/UnlyEd/GraphCMS-cache-boilerplate/badge.svg?targetFile=package.json)](https://snyk.io/test/github/UnlyEd/GraphCMS-cache-boilerplate?targetFile=package.json)
 
 # GraphCMS/GraphQL Cache Contingency service
 
@@ -123,6 +125,9 @@ Using this service instead of directly hitting a GraphQL endpoint provides the f
     + [Release a new version](#release-a-new-version)
   * [Code style](#code-style)
   * [Working on the project - IDE](#working-on-the-project---ide)
+- [Vulnerability disclosure](#vulnerability-disclosure)
+- [Contributors and maintainers](#contributors-and-maintainers)
+- [**[ABOUT UNLY]**](#about-unly-)
 
 <!-- tocstop -->
 
@@ -644,3 +649,35 @@ We also use EsLint, and extend AirBnb code style.
 
 WebStorm IDE is the preferred IDE for this project, as it is already configured with debug configurations, code style rules.
 Only common configuration files (meant to be shared) have been tracked on git. (see [`.gitignore`](./.gitignore))
+
+# Vulnerability disclosure
+
+[See our policy](https://github.com/UnlyEd/Unly).
+
+---
+
+# Contributors and maintainers
+
+This project is being maintained by:
+- [Unly] Ambroise Dhenain ([Vadorequest](https://github.com/vadorequest)) **(active)**
+
+Thanks to our contributors:
+- Hugo Martin ([Demmonius](https://github.com/Demmonius))
+
+---
+
+# **[ABOUT UNLY]** <a href="https://unly.org"><img src="https://storage.googleapis.com/unly/images/ICON_UNLY.png" height="40" align="right" alt="Unly logo" title="Unly logo" /></a>
+
+> [Unly](https://unly.org) is a socially responsible company, fighting inequality and facilitating access to higher education. 
+> Unly is committed to making education more inclusive, through responsible funding for students. 
+We provide technological solutions to help students find the necessary funding for their studies. 
+
+We proudly participate in many TechForGood initiatives. To support and learn more about our actions to make education accessible, visit : 
+- https://twitter.com/UnlyEd
+- https://www.facebook.com/UnlyEd/
+- https://www.linkedin.com/company/unly
+- [Interested to work with us?](https://jobs.zenploy.io/unly/about)
+
+Tech tips and tricks from our CTO on our [Medium page](https://medium.com/unly-org/tech/home)!
+
+#TECHFORGOOD #EDUCATIONFORALL
