@@ -9,8 +9,8 @@
 > The main goal of this service is to provide a **reliable cache contingency backup plan** in case a GraphQL endpoint is failing.
 This service most important priority is the **service reliability**, not the **data consistency**, which may not always be up-to-date.
 >
-> This Cache service is meant to run **on your own AWS account**, and be managed **by yourself**. 
-> It is powered by the [Serverless Framework](https://serverless.com/). 
+> This Cache service is meant to run **on your own AWS account**, and be managed **by yourself**.
+> It is powered by the [Serverless Framework](https://serverless.com/).
 > It uses _an optional_ 3rd party tool for monitoring the service: [Epsagon](https://epsagon.com/) _(free plan is most likely enough)_.
 >
 > It is a whole service meant to be used by developers/teams who rely on GraphCMS,
@@ -23,9 +23,9 @@ This service most important priority is the **service reliability**, not the **d
 ## Overview
 ### _"Why/when should I use this?"_
 
-- _"I don't use [GraphCMS](https://graphcms.com/), is this any useful to me?"_: 
-    - **It may be**. 
-    This service is meant to be a proxy server between you apps and your GraphQL API endpoint. 
+- _"I don't use [GraphCMS](https://graphcms.com/), is this any useful to me?"_:
+    - **It may be**.
+    This service is meant to be a proxy server between you apps and your GraphQL API endpoint.
     It's completely useless if you don't use GraphQL in the first place. (GraphCMS relies on GraphQL)
     **It was build with first-class GraphCMS support in mind, but it works for any GraphQL endpoint.** _The only difference between GraphQL/GraphCMS is that this project automatically forwards GraphCMS-specific HTTP headers to the GraphQL endpoint. But you can custom headers-forwarding by forking it!_
 - _"I want to protect our apps against unpredictable outages from GraphCMS (or its 3rd party services), will this help me?"_:
@@ -37,7 +37,7 @@ This service most important priority is the **service reliability**, not the **d
 - _"I want to improve the performance of our apps that rely on GraphQL API, will this help me?"_:
     - **Yes**, it will. Read on!
 - _"I want to run some automated data transformations after fetching those from GraphQL API, will this help me?"_:
-    - It **could**, but it's not the main purpose. 
+    - It **could**, but it's not the main purpose.
     It could be a good place to start though, give it a try and see for yourself!
 - _"I'm just looking for something simple to setup that will just act as a temporary cache (caching mechanism on a limited period), is this still for me?"_:
     - **Yes**, this project provides many benefits/features, but it's possible to only use it as a **temporary caching mechanism** _(instead of cache contingency as it was meant to be at the beginning)_.
@@ -48,11 +48,11 @@ This service most important priority is the **service reliability**, not the **d
 
 ### _"How should I use it?"_
 
-- **_"I am just curious"_**: 
-    - **Clone** the project, play around, run it on your local computer, deploy the service against your own AWS infrastructure and see how it works. 
+- **_"I am just curious"_**:
+    - **Clone** the project, play around, run it on your local computer, deploy the service against your own AWS infrastructure and see how it works.
     _(don't forget to remove your service from AWS, once you're done playing around!)_
-- **_"I'm thinking using it for a professional project"_**: 
-    - **Fork** the project, build you own stuff on top of it if you need to, keep up to date with the main project if needed (new features, bug fix, etc.), 
+- **_"I'm thinking using it for a professional project"_**:
+    - **Fork** the project, build you own stuff on top of it if you need to, keep up to date with the main project if needed (new features, bug fix, etc.),
     you'll be in control with the ability to quickly/simply catch up if ever needed.
     And this project comes with [some handy built-in scripts to help you keep it in sync!](#keeping-your-fork-up-to-date-with-this-boilerplate)
 
@@ -61,20 +61,20 @@ This service most important priority is the **service reliability**, not the **d
 
 Using this service instead of directly hitting a GraphQL endpoint provides the following benefits:
 
-1. **Contingency backup plan for a GraphQL endpoint**: 
+1. **Contingency backup plan for a GraphQL endpoint**:
     If a GraphQL endpoint is failing (whether it's a bug, planned maintenance, etc.), then all customers would be affected at once (app crash, etc.).
     As we cannot let this happen for obvious reasons, the goal of this contingency cache is to take over if GraphQL is failing, using a redis cache to return data cached by a previous request instead of crashing the app.
-1. **Auth proxy**: 
+1. **Auth proxy**:
     Also, this service acts as a proxy, and can be used to hide authentication credentials from the client (front-end apps).
     This way, credentials such as GraphQL credentials (know as "API token" on GraphCMS) are only used here, from this service, on the server side, and are therefore **safe**.
-1. **Cost mitigation** _(for GraphCMS, or any provider that bills you based on the inbound/outbound of data and API requests)_: 
+1. **Cost mitigation** _(for GraphCMS, or any provider that bills you based on the inbound/outbound of data and API requests)_:
     As we won't hit the GCMS API directly, but most requests are gonna be cached, the GraphCMS usage cost will decrease.
     On the other hand, additional costs from the AWS Lambda, API Gateway and redis will apply. (but it's much less expensive)
     **Additionally**, as you limit the number of requests that are handled by GraphCMS, you can go over your plan limit without suffering from your endpoint to be taken down (free plans, for instance, are automatically taken down when over limit).
     If you use a free GraphCMS plan to serve real customers, this service will allow you to increase your applications reliability and serve even more customers before upgrading your plan.
-1. **Performances**: 
+1. **Performances**:
     As we don't run a whole GraphQL query every time but just return cached results, this has benefits on performances (mostly network speed).
-1. **Additional data processing**: 
+1. **Additional data processing**:
     As this service acts as a proxy, it could also perform additional data processing, such as aggregations, that aren't available natively with GraphQL.
     _This is a possibility, but not the main purpose. And it's out of the scope for now, but could come in handy later._
 
@@ -82,49 +82,53 @@ Using this service instead of directly hitting a GraphQL endpoint provides the f
 
 <!-- toc -->
 
-- [Getting started](#getting-started)
-  * [_"How do I configure my app that currently queries GCMS API directly, and use my newly created cache service instead?"_](#_how-do-i-configure-my-app-that-currently-queries-gcms-api-directly-and-use-my-newly-created-cache-service-instead_)
-- [Cache workflow, and cache invalidation strategies](#cache-workflow-and-cache-invalidation-strategies)
-  * [Cache behaviour](#cache-behaviour)
-    + [Cache strategy](#cache-strategy)
-  * [Cache invalidation strategies](#cache-invalidation-strategies)
-    + [Strategy 1 - Automatically refresh all queries cached in redis, when a change is made on GraphCMS](#strategy-1---automatically-refresh-all-queries-cached-in-redis-when-a-change-is-made-on-graphcms)
-    + [Strategy 2 - Wipe the whole cache, when a change is made on GraphCMS](#strategy-2---wipe-the-whole-cache-when-a-change-is-made-on-graphcms)
-    + [Alternative strategy - Refresh the cache automatically by making it temporary](#alternative-strategy---refresh-the-cache-automatically-by-making-it-temporary)
-    + [Strategy X - Open an issue if you'd like to either implement or request another strategy!](#strategy-x---open-an-issue-if-youd-like-to-either-implement-or-request-another-strategy)
-  * [Cache version history](#cache-version-history)
-- [Reliability & resilience - Handling catastrophic failures (GraphCMS/Redis)](#reliability--resilience---handling-catastrophic-failures-graphcmsredis)
-- [Logging and debugging](#logging-and-debugging)
-  * [Own logs](#own-logs)
-  * [Epsagon](#epsagon)
-    + [Pricing](#pricing)
-    + [Opt-out](#opt-out)
-    + [Known issues with Epsagon](#known-issues-with-epsagon)
-- [API endpoints and usages](#api-endpoints-and-usages)
-  * [Cache endpoint](#cache-endpoint)
-  * [Cache invalidation endpoint (refresh)](#cache-invalidation-endpoint-refresh)
-  * [Cache invalidation endpoint (reset)](#cache-invalidation-endpoint-reset)
-  * [Read cached keys/GQL queries from cache](#read-cached-keysgql-queries-from-cache)
-  * [Status](#status)
-- [Advanced notions](#advanced-notions)
-  * [Multi customer instances](#multi-customer-instances)
-- [Keeping your fork up to date with this boilerplate](#keeping-your-fork-up-to-date-with-this-boilerplate)
-- [Testing](#testing)
-  * [Known issues with testing](#known-issues-with-testing)
-- [CI with AWS CodeBuild](#ci-with-aws-codebuild)
-- [Redis](#redis)
-  * [Known Redis limitations](#known-redis-limitations)
-  * [Select Subscription plan](#select-subscription-plan)
-  * [Database configuration](#database-configuration)
-    + [Data eviction policy](#data-eviction-policy)
-- [Other known limitations and considerations](#other-known-limitations-and-considerations)
-- [Changelog](#changelog)
-- [Contributing](#contributing)
-  * [Versions](#versions)
-    + [SemVer](#semver)
-    + [Release a new version](#release-a-new-version)
-  * [Code style](#code-style)
-  * [Working on the project - IDE](#working-on-the-project---ide)
+  * [Getting started](#getting-started)
+    + [_"How do I configure my app that currently queries GCMS API directly, and use my newly created cache service instead?"_](#_how-do-i-configure-my-app-that-currently-queries-gcms-api-directly-and-use-my-newly-created-cache-service-instead_)
+    + [How to deploy a new customer](#how-to-deploy-a-new-customer)
+      - [Config files to update:](#config-files-to-update)
+      - [Configure custom domains](#configure-custom-domains)
+      - [Deploy online](#deploy-online)
+  * [Cache workflow, and cache invalidation strategies](#cache-workflow-and-cache-invalidation-strategies)
+    + [Cache behaviour](#cache-behaviour)
+      - [Cache strategy](#cache-strategy)
+    + [Cache invalidation strategies](#cache-invalidation-strategies)
+      - [Strategy 1 - Automatically refresh all queries cached in redis, when a change is made on GraphCMS](#strategy-1---automatically-refresh-all-queries-cached-in-redis-when-a-change-is-made-on-graphcms)
+      - [Strategy 2 - Wipe the whole cache, when a change is made on GraphCMS](#strategy-2---wipe-the-whole-cache-when-a-change-is-made-on-graphcms)
+      - [Alternative strategy - Refresh the cache automatically by making it temporary](#alternative-strategy---refresh-the-cache-automatically-by-making-it-temporary)
+      - [Strategy X - Open an issue if you'd like to either implement or request another strategy!](#strategy-x---open-an-issue-if-youd-like-to-either-implement-or-request-another-strategy)
+    + [Cache version history](#cache-version-history)
+  * [Reliability & resilience - Handling catastrophic failures (GraphCMS/Redis)](#reliability--resilience---handling-catastrophic-failures-graphcmsredis)
+  * [Logging and debugging](#logging-and-debugging)
+    + [Own logs](#own-logs)
+    + [Epsagon](#epsagon)
+      - [Pricing](#pricing)
+      - [Opt-out](#opt-out)
+      - [Known issues with Epsagon](#known-issues-with-epsagon)
+  * [API endpoints and usages](#api-endpoints-and-usages)
+    + [Cache endpoint](#cache-endpoint)
+    + [Cache invalidation endpoint (refresh)](#cache-invalidation-endpoint-refresh)
+    + [Cache invalidation endpoint (reset)](#cache-invalidation-endpoint-reset)
+    + [Read cached keys/GQL queries from cache](#read-cached-keysgql-queries-from-cache)
+    + [Status](#status)
+  * [Advanced notions](#advanced-notions)
+    + [Multi customer instances](#multi-customer-instances)
+  * [Keeping your fork up to date with this boilerplate](#keeping-your-fork-up-to-date-with-this-boilerplate)
+  * [Testing](#testing)
+    + [Known issues with testing](#known-issues-with-testing)
+  * [CI with AWS CodeBuild](#ci-with-aws-codebuild)
+  * [Redis](#redis)
+    + [Known Redis limitations](#known-redis-limitations)
+    + [Select Subscription plan](#select-subscription-plan)
+    + [Database configuration](#database-configuration)
+      - [Data eviction policy](#data-eviction-policy)
+  * [Other known limitations and considerations](#other-known-limitations-and-considerations)
+  * [Changelog](#changelog)
+  * [Contributing](#contributing)
+    + [Versions](#versions)
+      - [SemVer](#semver)
+      - [Release a new version](#release-a-new-version)
+    + [Code style](#code-style)
+    + [Working on the project - IDE](#working-on-the-project---ide)
 - [Vulnerability disclosure](#vulnerability-disclosure)
 - [Contributors and maintainers](#contributors-and-maintainers)
 - [**[ABOUT UNLY]**](#about-unly-)
@@ -150,7 +154,7 @@ Clone the repo, then configure your local install:
 - Change the [serverless.yml](serverless.yml) configuration to match your needs
     - If you're just playing around and aren't using a **custom domain** to deploy to, then comment out the `serverless-domain-manager` plugin
     - Fill in the `redis.url` for the project you meant to deploy
-    
+
 On AWS (staging):
 - _You'll need to create a `.env.staging` file first_
 - `yarn deploy:demo` (you may want to either disable or configure the [`serverless-domain-manager`](https://github.com/amplify-education/serverless-domain-manager#readme) plugin)
@@ -163,7 +167,7 @@ On AWS (prod):
 
 If you've decided to clone/fork this project, please do the following:
 - Change [AWS CodeBuild buildspec.yml](./buildspec.yml) file _(for Continuous Integration)_:
-    - The project is configured to use AWS CodeBuild, we also use CodeClimate for code quality. 
+    - The project is configured to use AWS CodeBuild, we also use CodeClimate for code quality.
         [`slack-codebuild`](https://github.com/UnlyEd/slack-codebuild) is used to send build notification to a slack channel _(it's MIT too)_
     - `SLACK_WEBHOOK_URL`: **Use your own or remove it**, or your build notification will appear on **our** slack channel _(please don't do that)_
     - `CC_TEST_REPORTER_ID`: **Use your own or remove it**, or your build results will be mixed with our own
@@ -176,7 +180,7 @@ If you're using react with Apollo for instance, it's just a matter of changing t
 
 It should be simple and straightforward, as it's just a matter of fetching your cache `/cache-query` endpoint instead of hitting your GraphCMS endpoint directly.
 
-> Testing with a non-production application is strongly recommended to begin with. 
+> Testing with a non-production application is strongly recommended to begin with.
 > Also, use a `QUERY` GraphCMS token, you don't need to use a token that can write, read is enough and therefore **more secure**.
 
 
@@ -240,12 +244,12 @@ You're gonna need to configure AWS Route53 and AWS Certificate Manager to create
 
 > "Always reliable, eventually synchronized"
 
-This Cache service will **always return the value from the redis cache**. 
+This Cache service will **always return the value from the redis cache**.
 **_It will never check if a newer value exists on the GCMS's side._**
 
 Therefore, it may not be in-sync with the actual values held by GCMS.
 
-Due to this behaviour, this Cache service would never send fresher data on its own. 
+Due to this behaviour, this Cache service would never send fresher data on its own.
 That's why there is are different "**cache invalidation**" strategies.
 
 ### Cache invalidation strategies
@@ -256,8 +260,8 @@ We implemented the **Strategy 1** first, and then switched to the **Strategy 2**
 #### Strategy 1 - Automatically refresh all queries cached in redis, when a change is made on GraphCMS
 > This strategy is very useful if you have lots of reads and very few writes.
 >
-> It is very inefficient if you write a lot in GraphCMS (like automated massive writes). 
-> It doesn't play nice if you write a lot in GraphCMS (like automated massive writes in batches, such as massive data import). 
+> It is very inefficient if you write a lot in GraphCMS (like automated massive writes).
+> It doesn't play nice if you write a lot in GraphCMS (like automated massive writes in batches, such as massive data import).
 
 On GCMS's side, a **WebHook** is meant to **trigger** a **cache invalidation** every time a change is made in the data held by GCMS.
 
@@ -275,20 +279,20 @@ _Reminder_: The cache uses a Redis storage, with the **query** (as string) used 
 **N.B**: Special protection has been put in motion to avoid concurrent access of the `/refresh-cache` endpoint.
 Only one concurrent call is authorized, it is gracefully handled by the [`reservedConcurrency` option in serverless.yml](https://itnext.io/the-everything-guide-to-lambda-throttling-reserved-concurrency-and-execution-limits-d64f144129e5).
 
-**Known limitations**: 
+**Known limitations**:
 - This strategy hasn't been designed the best way it could have been, and **suffer from some rare race conditions**.
 It may happen, in the case of a massive write (such as an automated import tool that performs lots of writes really fast (like 100-200 writes in 30-50 seconds))
 that the `/refresh-cache` endpoint will be called several times (despite the concurrency lock), because the import script takes so long, and multiple calls to `/refresh-cache` are executed.
 
-    The **bad thing** is that the last call that fetches data from GraphCMS API and store them in the cache isn't necessarily executed at last, 
+    The **bad thing** is that the last call that fetches data from GraphCMS API and store them in the cache isn't necessarily executed at last,
 and it may happen that the data stored in the cache isn't the most recent version.
 
-    The proper way to tackle this issue would be to use a `queue`, with a `debounce` strategy. 
+    The proper way to tackle this issue would be to use a `queue`, with a `debounce` strategy.
     Basically wait until there are no more received request and then perform the cache refresh (instead of immediately performing the cache refresh).
 
     Unfortunately, we ran out of time and didn't tackle this issue yet. (_instead, we implemented Strategy 2, which is simpler_)
     We're also not really familiar with queue services (SQS, SNS, EventBridge, ...) and don't know which one would be the best for the job.
-    
+
     **Contributor help needed!**: That would be a very appreciated contribution! We'd definitely love a PR for this :)
 - If there are many queries stored in redis (hundreds), they may not all resolve themselves in the 30sec limit imposed by API GW.
 In such case, they'd likely start to fail randomly depending on GCMS API response time, and it'd become very difficult to ensure the integrity of all requests.
@@ -301,7 +305,7 @@ It'd also (in the current state) be very hard to fix.
 
 > This strategy is very useful if you have lots of reads and very few writes.
 >
-> It is very inefficient if you write a lot in GraphCMS (like automated massive writes). 
+> It is very inefficient if you write a lot in GraphCMS (like automated massive writes).
 
 Much simpler and fixes several downsides suffered by Strategy 1, such as:
 - Much easier to debug (easier to reason about)
@@ -316,7 +320,7 @@ If that query is rarely executed, it may happen that it's executed during an out
 - If the cache reset happens during a GCMS outage, then your app will crash anyway. **We don't check that GCMS is up and running before performing the cache reset.** _(but that'd be awesome, once they provide a way to do that!)_
 
     **Contributor help needed!**: If you know a way to detect GraphCMS status and therefore avoid a cache reset during an outage, we're very interested.
-    To our knowledge, they don't have any automated too we could rely on to detect this before wiping all the data from the cache, but that'd definitely be an awesome addition! 
+    To our knowledge, they don't have any automated too we could rely on to detect this before wiping all the data from the cache, but that'd definitely be an awesome addition!
 
 
 #### Alternative strategy - Refresh the cache automatically by making it temporary
@@ -346,13 +350,13 @@ Will yield the following request `body`:
 }
 ```
 
-Here, the `operationName` is `null`. 
-But if you specify it (`query myQueryName {}`) then it will reflect in the `operationName`, 
+Here, the `operationName` is `null`.
+But if you specify it (`query myQueryName {}`) then it will reflect in the `operationName`,
 and this field is also used **to index** the query in redis.
 
-So, if you wanted to automatically invalidate your cache every hour, you could just make the `operationName` **dynamic**, 
+So, if you wanted to automatically invalidate your cache every hour, you could just make the `operationName` **dynamic**,
 such as `query myQueryName_01_01_2019_11am {}`.
-This way, since the value would change every hours, a different GraphQL query would be sent every hour, 
+This way, since the value would change every hours, a different GraphQL query would be sent every hour,
 and the key used by redis would therefore be different every hours, leading to a cache refresh because the newer query would actually be executed on GraphCMS API before being cached.
 
 This is a nice workaround that allows you to define very precisely a different strategy, which works very differently and could basically be used to ensure the cached data is refreshed periodically.
@@ -386,7 +390,7 @@ Structure example:
 
 ```
 
-> Good to know: 
+> Good to know:
 > - The `body` is the object representation of the `gql` version of the query. _(basically, what's sent over the network)_
 > It contains a `query`, which is the string representation of the query.
 > - The `body.query` is sanitized and doesn't fully represent the key stored on redis (trim of `\n`, truncated (50 chars), etc.), for the sake of readability.
@@ -398,7 +402,7 @@ Structure example:
 
 This service must be resilient and reliable. It relies on Redis when the GraphCMS endpoint is down.
 
-> But, what happens if Redis fails instead of GraphCMS? 
+> But, what happens if Redis fails instead of GraphCMS?
 
 In such scenario, the outcome depends on the Cache API endpoint used:
 - `/cache-query`: A Redis error when searching for a previous query result is gracefully handled and redis is bypassed, a request is therefore sent to the GraphCMS endpoint and results are returned to the client.
@@ -429,7 +433,7 @@ If no `NODE_ENV` is defined, `staging` environment is used by default.
 
 ### Epsagon
 
-[Epsagon](https://epsagon.com/) is a tool that helps troubleshoot what happens on AWS. 
+[Epsagon](https://epsagon.com/) is a tool that helps troubleshoot what happens on AWS.
 It allows to see what happens on the backend, by analysing I/O network calls and generates graphs, that are very helpful to pinpoint a problem's source. ([See blog](https://epsagon.com/blog/introducing-trace-search/))
 
 Traces are configured within the project, the only required information is the `EPSAGON_APP_TOKEN` environment variable.
@@ -531,7 +535,7 @@ In case you forked the project and you'd like to keeping it up to date with this
 
 This is meant to be used manually, if you ever want to upgrade without trouble.
 
-**N.B**: Using the rebase mode will force you to force push afterwards (use it if you know what you're doing). 
+**N.B**: Using the rebase mode will force you to force push afterwards (use it if you know what you're doing).
 Using merge mode will create a merge commit (ugly, but simpler). _We use the rebase mode for our own private fork._
 
 ---
@@ -610,7 +614,7 @@ As we run on a Free plan, there are a few limitations to consider:
 One important thing not to miss when creating the Subscription, is to select the right availability zone (AZ), which depends on where you're located.
 We selected `ue-west-1`, which is Ireland, because it's the closer from us.
 
-You won't be able to select a different AZ in free plan, so choose carefully. 
+You won't be able to select a different AZ in free plan, so choose carefully.
 The database can only be created in the same region as the one selected for the subscription.
 
 ### Database configuration
@@ -635,15 +639,15 @@ A redis instance can be configured with those values:
 
 ## Other known limitations and considerations
 
-- The `/refresh-cache` endpoint has a timeout of 30 seconds. 
+- The `/refresh-cache` endpoint has a timeout of 30 seconds.
     There is no built-in way to handle workload longer than 30s yet.
-    This can be an issue if there are too many GraphCMS queries in the redis cache (which will trigger a TimeOut error), 
+    This can be an issue if there are too many GraphCMS queries in the redis cache (which will trigger a TimeOut error),
     as they may not all be updated when trying to invalidate the redis cache.
-    If a timeout happens, you can know which keys have been updated by looking at `/read-cache` `updatedAt` data, 
+    If a timeout happens, you can know which keys have been updated by looking at `/read-cache` `updatedAt` data,
     but there is no built-in way to automatically handle that limitation (yet).
-    Also, it's very likely that even if you run `/refresh-cache` multiple times, since the redis keys are gonna be refreshed in the same order, 
+    Also, it's very likely that even if you run `/refresh-cache` multiple times, since the redis keys are gonna be refreshed in the same order,
     it therefore should fail for the same keys across multiple attempts. (but it also depends on how fast GCMS API replies to each API calls, and that's not predictable at all)
-- When the `/refresh-cache` or `/read-cache` are called, the `redis.keys` method is used, which is blocking and not recommended for production applications. 
+- When the `/refresh-cache` or `/read-cache` are called, the `redis.keys` method is used, which is blocking and not recommended for production applications.
     A better implementation should be made there, probably following [this](https://github.com/luin/ioredis#streamify-scanning).
     It is not such a concern though, since those endpoints should rarely be called, and it won't be an issue if the redis store doesn't contain lots of keys anyway.
 
@@ -674,7 +678,7 @@ We use Semantic Versioning for this project: https://semver.org/. (`vMAJOR.MINOR
 
 #### Release a new version
 
-> Note: You should write the CHANGELOG.md doc before releasing the version. 
+> Note: You should write the CHANGELOG.md doc before releasing the version.
 This way, it'll be included in the same commit as the built files and version update
 
 Then, release a new version:
@@ -713,11 +717,11 @@ This project is being maintained by:
 
 # **[ABOUT UNLY]** <a href="https://unly.org"><img src="https://storage.googleapis.com/unly/images/ICON_UNLY.png" height="40" align="right" alt="Unly logo" title="Unly logo" /></a>
 
-> [Unly](https://unly.org) is a socially responsible company, fighting inequality and facilitating access to higher education. 
-> Unly is committed to making education more inclusive, through responsible funding for students. 
-We provide technological solutions to help students find the necessary funding for their studies. 
+> [Unly](https://unly.org) is a socially responsible company, fighting inequality and facilitating access to higher education.
+> Unly is committed to making education more inclusive, through responsible funding for students.
+We provide technological solutions to help students find the necessary funding for their studies.
 
-We proudly participate in many TechForGood initiatives. To support and learn more about our actions to make education accessible, visit : 
+We proudly participate in many TechForGood initiatives. To support and learn more about our actions to make education accessible, visit :
 - https://twitter.com/UnlyEd
 - https://www.facebook.com/UnlyEd/
 - https://www.linkedin.com/company/unly
