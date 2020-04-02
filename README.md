@@ -179,6 +179,53 @@ It should be simple and straightforward, as it's just a matter of fetching your 
 > Testing with a non-production application is strongly recommended to begin with. 
 > Also, use a `QUERY` GraphCMS token, you don't need to use a token that can write, read is enough and therefore **more secure**.
 
+
+### How to deploy a new customer
+
+> Follow this when you need to deploy a new customer
+
+#### Config files to update:
+
+- [`package.json`](./package.json)
+    - Duplicate an existing customer's scripts and just replace the name (e.g: `demo`) by the new customer's name
+    - Beware that `name` is defined by ourselves as we like, but you must use the same name in GraphCMS-TFP-cache, TFP and GraphCMS-utils projects + [Airtable base](https://airtable.com/) (hidden field in Institution's table)
+- [`serverless.yml`](./serverless.yml)
+    - Add a new `custom.envs` section with appropriate values (basically duplicate another customer (staging + prod) and change values)
+- [`secrets-staging.yml`](./secrets-staging.yml) and [`secrets-production.yml`](./secrets-production.yml)
+    - Add a new section with appropriate values (basically duplicate another customer and change values
+    - You may need to create a [new free Redis instance](https://app.redislabs.com/)
+    - You will need to get GraphCMS settings from their settings page
+        - [Staging](https://legacy.graphcms.com/91c560c2bcdb4e13861131241360105e/staging/settings)
+        - [Production](https://legacy.graphcms.com/91c560c2bcdb4e13861131241360105e/master/settings)
+    - You can re-use existing redis instances for the same customer, because queries between v2 and v3 are different and cannot overlap
+    - No need to change `REFRESH_CACHE_TOKEN`, `BASIC_AUTH_USERNAME`, `BASIC_AUTH_PASSWORD` between customers, they all share identical values for simplicity's sake, just beware we use different values between stages/environments
+
+#### Configure custom domains
+
+> This is only useful if you've kept the `serverless-domain-manager` plugin and thus want to deploy your service using a custom domain
+
+You're gonna need to configure AWS Route53 and AWS Certificate Manager to create your custom domain first.
+
+- Your custom domains are those listed as `custom.env.$customer.domain.name`
+- You can't deploy online until your custom domains have been validated with proper certificates by AWS
+- The whole process is gonna take a good 60-120mn, especially on your first time
+- You need access to the AWS account that manage your top-level DNS, APEX domains (root domain)
+    - For us, it's our AWS Root Account, and **only a few people people** usually have access to that **very critical account**, so make sure you have all the access permissions you'll need
+    - If your organisation only has one AWS Account, then it's a very very bad design security-wise (i.e: read our recommendations article below), but it's gonna help you go through the setup faster
+- **Tip**: [Learn more about how we recommend to structure your AWS Account](https://forum.serverless.com/t/restructuring-aws-proper-way-to-configure-aws-accounts-organisations-and-profiles-when-using-serverless/5009)
+
+[Go to the tutorial](https://forum.serverless.com/t/restructuring-aws-proper-way-to-configure-aws-accounts-organisations-and-profiles-when-using-serverless/5009/12?u=vadorequest-sl)
+
+- **Tip**: Note that commands using `sls create_domain` are managed here using `yarn create:$customer` and `yarn create:$customer:production`
+
+#### Deploy online
+
+> If you use custom domains and if they aren't ready then it'll fail (check your API Gateway).
+
+- `nvm use`
+- `yarn deploy:$customer` - Deploy the newly created customer in staging
+- `yarn deploy:$customer:production` - Deploy the newly created customer in production
+
 ---
 
 ## Cache workflow, and cache invalidation strategies
