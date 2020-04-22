@@ -192,17 +192,11 @@ It should be simple and straightforward, as it's just a matter of fetching your 
 
 - [`package.json`](./package.json)
     - Duplicate an existing customer's scripts and just replace the name (e.g: `demo`) by the new customer's name
-    - Beware that `name` is defined by ourselves as we like, but you must use the same name in GraphCMS-TFP-cache, TFP and GraphCMS-utils projects + [Airtable base](https://airtable.com/) (hidden field in Institution's table)
 - [`serverless.yml`](./serverless.yml)
     - Add a new `custom.envs` section with appropriate values (basically duplicate another customer (staging + prod) and change values)
 - [`secrets-staging.yml`](./secrets-staging.yml) and [`secrets-production.yml`](./secrets-production.yml)
     - Add a new section with appropriate values (basically duplicate another customer and change values
     - You may need to create a [new free Redis instance](https://app.redislabs.com/)
-    - You will need to get GraphCMS settings from their settings page
-        - [Staging](https://legacy.graphcms.com/91c560c2bcdb4e13861131241360105e/staging/settings)
-        - [Production](https://legacy.graphcms.com/91c560c2bcdb4e13861131241360105e/master/settings)
-    - You can re-use existing redis instances for the same customer, because queries between v2 and v3 are different and cannot overlap
-    - No need to change `REFRESH_CACHE_TOKEN`, `BASIC_AUTH_USERNAME`, `BASIC_AUTH_PASSWORD` between customers, they all share identical values for simplicity's sake, just beware we use different values between stages/environments
 
 #### Configure custom domains
 
