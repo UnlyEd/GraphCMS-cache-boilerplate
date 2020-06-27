@@ -1,5 +1,5 @@
-service: gcms-cache-boilerplate
-frameworkVersion: "=1.49.0"
+service: gcms-tfp-cache
+frameworkVersion: "=1.74.0"
 
 plugins:
   # - serverless-plugin-epsagon # https://github.com/epsagon/serverless-plugin-epsagon XXX We don't use it because it's not compatible with the basic_auth authorizer, used by /read-cache
