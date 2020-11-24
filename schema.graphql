@@ -9,32 +9,81 @@ schema {
 interface Node {
   "The id of the object."
   id: ID!
+  "The Stage of an object"
+  stage: Stage!
 }
 
-type AggregateAsset {
+type Aggregate {
   count: Int!
 }
 
+"Asset system model"
 type Asset implements Node {
-  createdAt: DateTime!
+  "The time the document was created"
+  createdAt(
+    "Variation of DateTime field to return, allows value from base document, current localization, or combined by returning the newer value of both"
+    variation: SystemDateTimeFieldVariation! = COMBINED
+  ): DateTime!
+  "Get the document in other stages"
+  documentInStages(
+    "Decides if the current stage should be included or not"
+    includeCurrent: Boolean! = false,
+    "Decides if the documents should match the parent documents locale or should use the fallback order defined in the tree"
+    inheritLocale: Boolean! = false,
+    "Potential stages that should be returned"
+    stages: [Stage!]! = [PUBLISHED, DRAFT]
+  ): [Asset!]!
+  "The file name"
   fileName: String!
+  "The file handle"
   handle: String!
+  "The height of the file"
   height: Float
+  "List of Asset versions"
+  history(
+    limit: Int! = 10,
+    skip: Int! = 0,
+    "This is optional and can be used to fetch the document version history for a specific stage instead of the current one"
+    stageOverride: Stage
+  ): [Version!]!
+  "The unique identifier"
   id: ID!
+  "System Locale field"
+  locale: Locale!
+  "Get the other localizations for this document"
+  localizations(
+    "Decides if the current locale should be included or not"
+    includeCurrent: Boolean! = false,
+    "Potential locales that should be returned"
+    locales: [Locale!]! = [en]
+  ): [Asset!]!
+  "The mime type of the file"
   mimeType: String
+  "The time the document was published. Null on documents in draft stage."
+  publishedAt(
+    "Variation of DateTime field to return, allows value from base document, current localization, or combined by returning the newer value of both"
+    variation: SystemDateTimeFieldVariation! = COMBINED
+  ): DateTime
+  "The file size"
   size: Float
-  status: Status!
-  updatedAt: DateTime!
+  "System stage field"
+  stage: Stage!
+  "The time the document was updated"
+  updatedAt(
+    "Variation of DateTime field to return, allows value from base document, current localization, or combined by returning the newer value of both"
+    variation: SystemDateTimeFieldVariation! = COMBINED
+  ): DateTime!
   "Get the url for the asset with provided transformations applied."
   url(transformation: AssetTransformationInput): String!
+  "The file width"
   width: Float
 }
 
 "A connection to a list of items."
 type AssetConnection {
-  aggregate: AggregateAsset!
+  aggregate: Aggregate!
   "A list of edges."
-  edges: [AssetEdge]!
+  edges: [AssetEdge!]!
   "Information to aid in pagination."
   pageInfo: PageInfo!
 }
@@ -47,39 +96,165 @@ type AssetEdge {
   node: Asset!
 }
 
-type AssetPreviousValues {
-  createdAt: DateTime!
-  fileName: String!
-  handle: String!
-  height: Float
-  id: ID!
-  mimeType: String
-  size: Float
-  status: Status!
-  updatedAt: DateTime!
-  width: Float
-}
-
-type AssetSubscriptionPayload {
-  mutation: MutationType!
-  node: Asset
-  previousValues: AssetPreviousValues
-  updatedFields: [String!]
-}
-
 type BatchPayload {
   "The number of nodes that have been affected by the Batch operation."
   count: Long!
 }
 
+"Representing a color value comprising of HEX, RGBA and css color values"
+type Color {
+  css: String!
+  hex: Hex!
+  rgba: RGBA!
+}
+
+type DocumentVersion {
+  createdAt: DateTime!
+  data: Json
+  id: ID!
+  revision: Int!
+  stage: Stage!
+}
+
+"Representing a geolocation point with latitude and longitude"
+type Location {
+  distance(from: LocationInput!): Float!
+  latitude: Float!
+  longitude: Float!
+}
+
 type Mutation {
-  createAsset(data: AssetCreateInput!): Asset!
-  deleteAsset(where: AssetWhereUniqueInput!): Asset
-  deleteManyAssets(where: AssetWhereInput): BatchPayload!
+  "Create one asset"
+  createAsset(data: AssetCreateInput!): Asset @deprecated(reason : "Asset mutations will be overhauled soon")
+  "Delete one asset from _all_ existing stages. Returns deleted document."
+  deleteAsset(
+    "Document to delete"
+    where: AssetWhereUniqueInput!
+  ): Asset
+  "Delete many Asset documents"
+  deleteManyAssets(
+    "Documents to delete"
+    where: AssetManyWhereInput
+  ): BatchPayload! @deprecated(reason : "Please use the new paginated many mutation (deleteManyAssetsConnection)")
+  "Delete many Asset documents, return deleted documents"
+  deleteManyAssetsConnection(
+    after: ID,
+    before: ID,
+    first: Int,
+    last: Int,
+    skip: Int,
+    "Documents to delete"
+    where: AssetManyWhereInput
+  ): AssetConnection!
+  "Publish one asset"
+  publishAsset(
+    "Optional localizations to publish"
+    locales: [Locale!],
+    "Whether to publish the base document"
+    publishBase: Boolean = true,
+    "Publishing target stage"
+    to: [Stage!]! = [PUBLISHED],
+    "Document to publish"
+    where: AssetWhereUniqueInput!,
+    "Whether to include the default locale when publishBase is set"
+    withDefaultLocale: Boolean = true
+  ): Asset
+  "Publish many Asset documents"
+  publishManyAssets(
+    "Document localizations to publish"
+    locales: [Locale!],
+    "Whether to publish the base document"
+    publishBase: Boolean = true,
+    "Stages to publish documents to"
+    to: [Stage!]! = [PUBLISHED],
+    "Identifies documents in each stage to be published"
+    where: AssetManyWhereInput,
+    "Whether to include the default locale when publishBase is true"
+    withDefaultLocale: Boolean = true
+  ): BatchPayload! @deprecated(reason : "Please use the new paginated many mutation (publishManyAssetsConnection)")
+  "Publish many Asset documents"
+  publishManyAssetsConnection(
+    after: ID,
+    before: ID,
+    first: Int,
+    "Stage to find matching documents in"
+    from: Stage = DRAFT,
+    last: Int,
+    "Document localizations to publish"
+    locales: [Locale!],
+    "Whether to publish the base document"
+    publishBase: Boolean = true,
+    skip: Int,
+    "Stages to publish documents to"
+    to: [Stage!]! = [PUBLISHED],
+    "Identifies documents in each stage to be published"
+    where: AssetManyWhereInput,
+    "Whether to include the default locale when publishBase is true"
+    withDefaultLocale: Boolean = true
+  ): AssetConnection!
+  "Unpublish one asset from selected stages. Unpublish either the complete document with its relations, localizations and base data or specific localizations only."
+  unpublishAsset(
+    "Stages to unpublish document from"
+    from: [Stage!]! = [PUBLISHED],
+    "Optional locales to unpublish. Unpublishing the default locale will completely remove the document from the selected stages"
+    locales: [Locale!],
+    "Unpublish complete document including default localization and relations from stages. Can be disabled."
+    unpublishBase: Boolean = true,
+    "Document to unpublish"
+    where: AssetWhereUniqueInput!
+  ): Asset
+  "Unpublish many Asset documents"
+  unpublishManyAssets(
+    "Stages to unpublish documents from"
+    from: [Stage!]! = [PUBLISHED],
+    "Locales to unpublish"
+    locales: [Locale!],
+    "Whether to unpublish the base document and default localization"
+    unpublishBase: Boolean = true,
+    "Identifies documents in each stage"
+    where: AssetManyWhereInput
+  ): BatchPayload! @deprecated(reason : "Please use the new paginated many mutation (unpublishManyAssetsConnection)")
+  "Find many Asset documents that match criteria in specified stage and unpublish from target stages"
+  unpublishManyAssetsConnection(
+    after: ID,
+    before: ID,
+    first: Int,
+    "Stages to unpublish documents from"
+    from: [Stage!]! = [PUBLISHED],
+    last: Int,
+    "Locales to unpublish"
+    locales: [Locale!],
+    skip: Int,
+    "Stage to find matching documents in"
+    stage: Stage = DRAFT,
+    "Whether to unpublish the base document and default localization"
+    unpublishBase: Boolean = true,
+    "Identifies documents in draft stage"
+    where: AssetManyWhereInput
+  ): AssetConnection!
+  "Update one asset"
   updateAsset(data: AssetUpdateInput!, where: AssetWhereUniqueInput!): Asset
-  updateManyAssets(data: AssetUpdateManyMutationInput!, where: AssetWhereInput): BatchPayload!
-  uploadAsset(data: AssetUploadInput!): Asset!
-  upsertAsset(create: AssetCreateInput!, update: AssetUpdateInput!, where: AssetWhereUniqueInput!): Asset!
+  "Update many assets"
+  updateManyAssets(
+    "Updates to document content"
+    data: AssetUpdateManyInput!,
+    "Documents to apply update on"
+    where: AssetManyWhereInput
+  ): BatchPayload! @deprecated(reason : "Please use the new paginated many mutation (updateManyAssetsConnection)")
+  "Update many Asset documents"
+  updateManyAssetsConnection(
+    after: ID,
+    before: ID,
+    "Updates to document content"
+    data: AssetUpdateManyInput!,
+    first: Int,
+    last: Int,
+    skip: Int,
+    "Documents to apply update on"
+    where: AssetManyWhereInput
+  ): AssetConnection!
+  "Upsert one asset"
+  upsertAsset(upsert: AssetUpsertInput!, where: AssetWhereUniqueInput!): Asset
 }
 
 "Information about pagination in a connection."
@@ -90,19 +265,115 @@ type PageInfo {
   hasNextPage: Boolean!
   "When paginating backwards, are there more items?"
   hasPreviousPage: Boolean!
+  "Number of items in the current page."
+  pageSize: Int
   "When paginating backwards, the cursor to continue."
   startCursor: String
 }
 
 type Query {
-  asset(where: AssetWhereUniqueInput!): Asset
-  assets(after: String, before: String, first: Int, last: Int, orderBy: AssetOrderByInput, skip: Int, where: AssetWhereInput): [Asset]!
-  assetsConnection(after: String, before: String, first: Int, last: Int, orderBy: AssetOrderByInput, skip: Int, where: AssetWhereInput): AssetConnection!
+  "Retrieve a single asset"
+  asset(
+    """
+
+    Defines which locales should be returned.
+
+    Note that `Asset` will be affected directly by this argument, as well as any other related models with localized fields in the query's subtree.
+    The first locale matching the provided list will be returned, entries with non matching locales will be filtered out.
+
+    This argument may be overwritten by another locales definition in a relational child field, this will effectively use the overwritten argument for the affected query's subtree.
+    """
+    locales: [Locale!]! = [en],
+    stage: Stage! = PUBLISHED,
+    where: AssetWhereUniqueInput!
+  ): Asset
+  "Retrieve document version"
+  assetVersion(where: VersionWhereInput!): DocumentVersion
+  "Retrieve multiple assets"
+  assets(
+    after: String,
+    before: String,
+    first: Int,
+    last: Int,
+    """
+
+    Defines which locales should be returned.
+
+    Note that `Asset` will be affected directly by this argument, as well as any other related models with localized fields in the query's subtree.
+    The first locale matching the provided list will be returned, entries with non matching locales will be filtered out.
+
+    This argument may be overwritten by another locales definition in a relational child field, this will effectively use the overwritten argument for the affected query's subtree.
+    """
+    locales: [Locale!]! = [en],
+    orderBy: AssetOrderByInput,
+    skip: Int,
+    stage: Stage! = PUBLISHED,
+    where: AssetWhereInput
+  ): [Asset!]!
+  "Retrieve multiple assets using the Relay connection interface"
+  assetsConnection(
+    after: String,
+    before: String,
+    first: Int,
+    last: Int,
+    """
+
+    Defines which locales should be returned.
+
+    Note that `Asset` will be affected directly by this argument, as well as any other related models with localized fields in the query's subtree.
+    The first locale matching the provided list will be returned, entries with non matching locales will be filtered out.
+
+    This argument may be overwritten by another locales definition in a relational child field, this will effectively use the overwritten argument for the affected query's subtree.
+    """
+    locales: [Locale!]! = [en],
+    orderBy: AssetOrderByInput,
+    skip: Int,
+    stage: Stage! = PUBLISHED,
+    where: AssetWhereInput
+  ): AssetConnection!
   "Fetches an object given its ID"
   node(
-    #The ID of an object
-    id: ID!
+    "The ID of an object"
+    id: ID!,
+    """
+
+    Defines which locales should be returned.
+
+    Note that `Node` is a model without localized fields and will not be affected directly by this argument, however the locales will be passed on to any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first locale matching the provided list of locales will be returned, entries with non matching locales will be filtered out.
+
+    This argument may be overwritten by another locales definition in a relational child field, this will effectively use the overwritten argument for the affected query's subtree.
+    """
+    locales: [Locale!]! = [en],
+    stage: Stage! = PUBLISHED
   ): Node
+}
+
+"Representing a RGBA color value: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#rgb()_and_rgba()"
+type RGBA {
+  a: RGBATransparency!
+  b: RGBAHue!
+  g: RGBAHue!
+  r: RGBAHue!
+}
+
+"Custom type representing a rich text value comprising of raw rich text ast, html, markdown and text values"
+type RichText {
+  "Returns HTMl representation"
+  html: String!
+  "Returns Markdown representation"
+  markdown: String!
+  "Returns AST representation"
+  raw: RichTextAST!
+  "Returns plain-text contents of RichText"
+  text: String!
+}
+
+type Version {
+  createdAt: DateTime!
+  id: ID!
+  revision: Int!
+  stage: Stage!
 }
 
 enum AssetOrderByInput {
@@ -118,10 +389,10 @@ enum AssetOrderByInput {
   id_DESC
   mimeType_ASC
   mimeType_DESC
+  publishedAt_ASC
+  publishedAt_DESC
   size_ASC
   size_DESC
-  status_ASC
-  status_DESC
   updatedAt_ASC
   updatedAt_DESC
   width_ASC
@@ -148,65 +419,235 @@ enum DocumentFileTypes {
 }
 
 enum ImageFit {
-  #Resizes the image to fit within the specified parameters without distorting, cropping, or changing the aspect ratio.
+  "Resizes the image to fit within the specified parameters without distorting, cropping, or changing the aspect ratio."
   clip
-  #Resizes the image to fit the specified parameters exactly by removing any parts of the image that don't fit within the boundaries.
+  "Resizes the image to fit the specified parameters exactly by removing any parts of the image that don't fit within the boundaries."
   crop
-  #Resizes the image to fit within the parameters, but as opposed to 'fit:clip' will not scale the image if the image is smaller than the output size.
+  "Resizes the image to fit within the parameters, but as opposed to 'fit:clip' will not scale the image if the image is smaller than the output size."
   max
-  #Resizes the image to fit the specified parameters exactly by scaling the image to the desired size. The aspect ratio of the image is not respected and the image can be distorted using this method.
+  "Resizes the image to fit the specified parameters exactly by scaling the image to the desired size. The aspect ratio of the image is not respected and the image can be distorted using this method."
   scale
 }
 
+"Locale system enumeration"
 enum Locale {
-  EN
+  en
 }
 
-enum MutationType {
-  CREATED
-  DELETED
-  UPDATED
-}
-
-enum Status {
-  ARCHIVED
+"Stage system enumeration"
+enum Stage {
+  "The Draft is the default stage for all your content."
   DRAFT
+  "The Published stage is where you can publish your content to."
   PUBLISHED
 }
 
+enum SystemDateTimeFieldVariation {
+  BASE
+  COMBINED
+  LOCALIZATION
+}
+
+"System User Kind"
+enum UserKind {
+  MEMBER
+  PAT
+  PUBLIC
+  WEBHOOK
+}
+
+enum _FilterKind {
+  AND
+  NOT
+  OR
+  contains
+  contains_all
+  contains_none
+  contains_some
+  ends_with
+  eq
+  eq_not
+  gt
+  gte
+  in
+  lt
+  lte
+  not_contains
+  not_ends_with
+  not_in
+  not_starts_with
+  relational_every
+  relational_none
+  relational_single
+  relational_some
+  search
+  starts_with
+}
+
+enum _MutationInputFieldKind {
+  enum
+  relation
+  richText
+  scalar
+  union
+  virtual
+}
+
+enum _MutationKind {
+  create
+  delete
+  deleteMany
+  publish
+  publishMany
+  unpublish
+  unpublishMany
+  update
+  updateMany
+  upsert
+}
+
+enum _OrderDirection {
+  asc
+  desc
+}
+
+enum _RelationInputCardinality {
+  many
+  one
+}
+
+enum _RelationInputKind {
+  create
+  update
+}
+
+enum _RelationKind {
+  regular
+  union
+}
+
+enum _SystemDateTimeFieldVariation {
+  base
+  combined
+  localization
+}
+
 input AssetCreateInput {
+  createdAt: DateTime
+  fileName: String!
+  handle: String!
+  height: Float
+  "Inline mutations for managing document localizations excluding the default locale"
+  localizations: AssetCreateLocalizationsInput
+  mimeType: String
+  size: Float
+  updatedAt: DateTime
+  width: Float
+}
+
+input AssetCreateLocalizationDataInput {
+  createdAt: DateTime
   fileName: String!
   handle: String!
   height: Float
   mimeType: String
   size: Float
-  status: Status
+  updatedAt: DateTime
   width: Float
 }
 
-input AssetSubscriptionWhereInput {
+input AssetCreateLocalizationInput {
+  "Localization input"
+  data: AssetCreateLocalizationDataInput!
+  locale: Locale!
+}
+
+input AssetCreateLocalizationsInput {
+  "Create localizations for the newly-created document"
+  create: [AssetCreateLocalizationInput!]
+}
+
+"Identifies documents"
+input AssetManyWhereInput {
   "Logical AND on all given filters."
-  AND: [AssetSubscriptionWhereInput!]
+  AND: [AssetWhereInput!]
   "Logical NOT on all given filters combined by AND."
-  NOT: [AssetSubscriptionWhereInput!]
+  NOT: [AssetWhereInput!]
   "Logical OR on all given filters."
-  OR: [AssetSubscriptionWhereInput!]
-  "The subscription event gets dispatched when it's listed in mutation_in"
-  mutation_in: [MutationType!]
-  node: AssetWhereInput
-  "The subscription event gets only dispatched when one of the updated fields names is included in this list"
-  updatedFields_contains: String
-  "The subscription event gets only dispatched when all of the field names included in this list have been updated"
-  updatedFields_contains_every: [String!]
-  "The subscription event gets only dispatched when some of the field names included in this list have been updated"
-  updatedFields_contains_some: [String!]
+  OR: [AssetWhereInput!]
+  "Contains search across all appropriate fields."
+  _search: String
+  createdAt: DateTime
+  "All values greater than the given value."
+  createdAt_gt: DateTime
+  "All values greater than or equal the given value."
+  createdAt_gte: DateTime
+  "All values that are contained in given list."
+  createdAt_in: [DateTime!]
+  "All values less than the given value."
+  createdAt_lt: DateTime
+  "All values less than or equal the given value."
+  createdAt_lte: DateTime
+  "All values that are not equal to given value."
+  createdAt_not: DateTime
+  "All values that are not contained in given list."
+  createdAt_not_in: [DateTime!]
+  id: ID
+  "All values containing the given string."
+  id_contains: ID
+  "All values ending with the given string."
+  id_ends_with: ID
+  "All values that are contained in given list."
+  id_in: [ID!]
+  "All values that are not equal to given value."
+  id_not: ID
+  "All values not containing the given string."
+  id_not_contains: ID
+  "All values not ending with the given string"
+  id_not_ends_with: ID
+  "All values that are not contained in given list."
+  id_not_in: [ID!]
+  "All values not starting with the given string."
+  id_not_starts_with: ID
+  "All values starting with the given string."
+  id_starts_with: ID
+  publishedAt: DateTime
+  "All values greater than the given value."
+  publishedAt_gt: DateTime
+  "All values greater than or equal the given value."
+  publishedAt_gte: DateTime
+  "All values that are contained in given list."
+  publishedAt_in: [DateTime!]
+  "All values less than the given value."
+  publishedAt_lt: DateTime
+  "All values less than or equal the given value."
+  publishedAt_lte: DateTime
+  "All values that are not equal to given value."
+  publishedAt_not: DateTime
+  "All values that are not contained in given list."
+  publishedAt_not_in: [DateTime!]
+  updatedAt: DateTime
+  "All values greater than the given value."
+  updatedAt_gt: DateTime
+  "All values greater than or equal the given value."
+  updatedAt_gte: DateTime
+  "All values that are contained in given list."
+  updatedAt_in: [DateTime!]
+  "All values less than the given value."
+  updatedAt_lt: DateTime
+  "All values less than or equal the given value."
+  updatedAt_lte: DateTime
+  "All values that are not equal to given value."
+  updatedAt_not: DateTime
+  "All values that are not contained in given list."
+  updatedAt_not_in: [DateTime!]
 }
 
 "Transformations for Assets"
 input AssetTransformationInput {
   document: DocumentTransformationInput
   image: ImageTransformationInput
-  "Pass `true` if you want to validate the passed transformation parameters"
+  "Pass true if you want to validate the passed transformation parameters"
   validateOptions: Boolean = false
 }
 
@@ -214,27 +655,100 @@ input AssetUpdateInput {
   fileName: String
   handle: String
   height: Float
+  "Manage document localizations"
+  localizations: AssetUpdateLocalizationsInput
   mimeType: String
   size: Float
-  status: Status
   width: Float
 }
 
-input AssetUpdateManyMutationInput {
+input AssetUpdateLocalizationDataInput {
   fileName: String
   handle: String
   height: Float
   mimeType: String
   size: Float
-  status: Status
   width: Float
 }
 
-input AssetUploadInput {
-  status: Status
-  url: String!
+input AssetUpdateLocalizationInput {
+  data: AssetUpdateLocalizationDataInput!
+  locale: Locale!
 }
 
+input AssetUpdateLocalizationsInput {
+  "Localizations to create"
+  create: [AssetCreateLocalizationInput!]
+  "Localizations to delete"
+  delete: [Locale!]
+  "Localizations to update"
+  update: [AssetUpdateLocalizationInput!]
+  upsert: [AssetUpsertLocalizationInput!]
+}
+
+input AssetUpdateManyInput {
+  fileName: String
+  height: Float
+  "Optional updates to localizations"
+  localizations: AssetUpdateManyLocalizationsInput
+  mimeType: String
+  size: Float
+  width: Float
+}
+
+input AssetUpdateManyLocalizationDataInput {
+  fileName: String
+  height: Float
+  mimeType: String
+  size: Float
+  width: Float
+}
+
+input AssetUpdateManyLocalizationInput {
+  data: AssetUpdateManyLocalizationDataInput!
+  locale: Locale!
+}
+
+input AssetUpdateManyLocalizationsInput {
+  "Localizations to update"
+  update: [AssetUpdateManyLocalizationInput!]
+}
+
+input AssetUpdateManyWithNestedWhereInput {
+  "Update many input"
+  data: AssetUpdateManyInput!
+  "Document search"
+  where: AssetWhereInput!
+}
+
+input AssetUpdateWithNestedWhereUniqueInput {
+  "Document to update"
+  data: AssetUpdateInput!
+  "Unique document search"
+  where: AssetWhereUniqueInput!
+}
+
+input AssetUpsertInput {
+  "Create document if it didn't exist"
+  create: AssetCreateInput!
+  "Update document if it exists"
+  update: AssetUpdateInput!
+}
+
+input AssetUpsertLocalizationInput {
+  create: AssetCreateLocalizationDataInput!
+  locale: Locale!
+  update: AssetUpdateLocalizationDataInput!
+}
+
+input AssetUpsertWithNestedWhereUniqueInput {
+  "Upsert data"
+  data: AssetUpsertInput!
+  "Unique document search"
+  where: AssetWhereUniqueInput!
+}
+
+"Identifies documents"
 input AssetWhereInput {
   "Logical AND on all given filters."
   AND: [AssetWhereInput!]
@@ -242,6 +756,7 @@ input AssetWhereInput {
   NOT: [AssetWhereInput!]
   "Logical OR on all given filters."
   OR: [AssetWhereInput!]
+  "Contains search across all appropriate fields."
   _search: String
   createdAt: DateTime
   "All values greater than the given value."
@@ -263,21 +778,13 @@ input AssetWhereInput {
   fileName_contains: String
   "All values ending with the given string."
   fileName_ends_with: String
-  "All values greater than the given value."
-  fileName_gt: String
-  "All values greater than or equal the given value."
-  fileName_gte: String
   "All values that are contained in given list."
   fileName_in: [String!]
-  "All values less than the given value."
-  fileName_lt: String
-  "All values less than or equal the given value."
-  fileName_lte: String
   "All values that are not equal to given value."
   fileName_not: String
   "All values not containing the given string."
   fileName_not_contains: String
-  "All values not ending with the given string."
+  "All values not ending with the given string"
   fileName_not_ends_with: String
   "All values that are not contained in given list."
   fileName_not_in: [String!]
@@ -290,21 +797,13 @@ input AssetWhereInput {
   handle_contains: String
   "All values ending with the given string."
   handle_ends_with: String
-  "All values greater than the given value."
-  handle_gt: String
-  "All values greater than or equal the given value."
-  handle_gte: String
   "All values that are contained in given list."
   handle_in: [String!]
-  "All values less than the given value."
-  handle_lt: String
-  "All values less than or equal the given value."
-  handle_lte: String
   "All values that are not equal to given value."
   handle_not: String
   "All values not containing the given string."
   handle_not_contains: String
-  "All values not ending with the given string."
+  "All values not ending with the given string"
   handle_not_ends_with: String
   "All values that are not contained in given list."
   handle_not_in: [String!]
@@ -332,21 +831,13 @@ input AssetWhereInput {
   id_contains: ID
   "All values ending with the given string."
   id_ends_with: ID
-  "All values greater than the given value."
-  id_gt: ID
-  "All values greater than or equal the given value."
-  id_gte: ID
   "All values that are contained in given list."
   id_in: [ID!]
-  "All values less than the given value."
-  id_lt: ID
-  "All values less than or equal the given value."
-  id_lte: ID
   "All values that are not equal to given value."
   id_not: ID
   "All values not containing the given string."
   id_not_contains: ID
-  "All values not ending with the given string."
+  "All values not ending with the given string"
   id_not_ends_with: ID
   "All values that are not contained in given list."
   id_not_in: [ID!]
@@ -359,21 +850,13 @@ input AssetWhereInput {
   mimeType_contains: String
   "All values ending with the given string."
   mimeType_ends_with: String
-  "All values greater than the given value."
-  mimeType_gt: String
-  "All values greater than or equal the given value."
-  mimeType_gte: String
   "All values that are contained in given list."
   mimeType_in: [String!]
-  "All values less than the given value."
-  mimeType_lt: String
-  "All values less than or equal the given value."
-  mimeType_lte: String
   "All values that are not equal to given value."
   mimeType_not: String
   "All values not containing the given string."
   mimeType_not_contains: String
-  "All values not ending with the given string."
+  "All values not ending with the given string"
   mimeType_not_ends_with: String
   "All values that are not contained in given list."
   mimeType_not_in: [String!]
@@ -381,6 +864,21 @@ input AssetWhereInput {
   mimeType_not_starts_with: String
   "All values starting with the given string."
   mimeType_starts_with: String
+  publishedAt: DateTime
+  "All values greater than the given value."
+  publishedAt_gt: DateTime
+  "All values greater than or equal the given value."
+  publishedAt_gte: DateTime
+  "All values that are contained in given list."
+  publishedAt_in: [DateTime!]
+  "All values less than the given value."
+  publishedAt_lt: DateTime
+  "All values less than or equal the given value."
+  publishedAt_lte: DateTime
+  "All values that are not equal to given value."
+  publishedAt_not: DateTime
+  "All values that are not contained in given list."
+  publishedAt_not_in: [DateTime!]
   size: Float
   "All values greater than the given value."
   size_gt: Float
@@ -396,13 +894,6 @@ input AssetWhereInput {
   size_not: Float
   "All values that are not contained in given list."
   size_not_in: [Float!]
-  status: Status
-  "All values that are contained in given list."
-  status_in: [Status!]
-  "All values that are not equal to given value."
-  status_not: Status
-  "All values that are not contained in given list."
-  status_not_in: [Status!]
   updatedAt: DateTime
   "All values greater than the given value."
   updatedAt_gt: DateTime
@@ -435,37 +926,55 @@ input AssetWhereInput {
   width_not_in: [Float!]
 }
 
+"References Asset record uniquely"
 input AssetWhereUniqueInput {
-  handle: String
   id: ID
+}
+
+"Accepts either HEX or RGBA color value. At least one of hex or rgba value should be passed. If both are passed RGBA is used."
+input ColorInput {
+  hex: Hex
+  rgba: RGBAInput
+}
+
+input ConnectPositionInput {
+  "Connect document after specified document"
+  after: ID
+  "Connect document before specified document"
+  before: ID
+  "Connect document at last position"
+  end: Boolean
+  "Connect document at first position"
+  start: Boolean
 }
 
 input DocumentOutputInput {
   """
+
   Transforms a document into a desired file type.
   See this matrix for format support:
 
-  PDF:\tjpg, odp, ods, odt, png, svg, txt, and webp
-  DOC:\tdocx, html, jpg, odt, pdf, png, svg, txt, and webp
-  DOCX:\tdoc, html, jpg, odt, pdf, png, svg, txt, and webp
-  ODT:\tdoc, docx, html, jpg, pdf, png, svg, txt, and webp
-  XLS:\tjpg, pdf, ods, png, svg, xlsx, and webp
-  XLSX:\tjpg, pdf, ods, png, svg, xls, and webp
-  ODS:\tjpg, pdf, png, xls, svg, xlsx, and webp
-  PPT:\tjpg, odp, pdf, png, svg, pptx, and webp
-  PPTX:\tjpg, odp, pdf, png, svg, ppt, and webp
-  ODP:\tjpg, pdf, png, ppt, svg, pptx, and webp
-  BMP:\tjpg, odp, ods, odt, pdf, png, svg, and webp
-  GIF:\tjpg, odp, ods, odt, pdf, png, svg, and webp
-  JPG:\tjpg, odp, ods, odt, pdf, png, svg, and webp
-  PNG:\tjpg, odp, ods, odt, pdf, png, svg, and webp
-  WEBP:\tjpg, odp, ods, odt, pdf, png, svg, and webp
-  TIFF:\tjpg, odp, ods, odt, pdf, png, svg, and webp
-  AI:\t    jpg, odp, ods, odt, pdf, png, svg, and webp
-  PSD:\tjpg, odp, ods, odt, pdf, png, svg, and webp
-  SVG:\tjpg, odp, ods, odt, pdf, png, and webp
-  HTML:\tjpg, odt, pdf, svg, txt, and webp
-  TXT:\tjpg, html, odt, pdf, svg, and webp
+  PDF:  jpg, odp, ods, odt, png, svg, txt, and webp
+  DOC:  docx, html, jpg, odt, pdf, png, svg, txt, and webp
+  DOCX:  doc, html, jpg, odt, pdf, png, svg, txt, and webp
+  ODT:  doc, docx, html, jpg, pdf, png, svg, txt, and webp
+  XLS:  jpg, pdf, ods, png, svg, xlsx, and webp
+  XLSX:  jpg, pdf, ods, png, svg, xls, and webp
+  ODS:  jpg, pdf, png, xls, svg, xlsx, and webp
+  PPT:  jpg, odp, pdf, png, svg, pptx, and webp
+  PPTX:  jpg, odp, pdf, png, svg, ppt, and webp
+  ODP:  jpg, pdf, png, ppt, svg, pptx, and webp
+  BMP:  jpg, odp, ods, odt, pdf, png, svg, and webp
+  GIF:  jpg, odp, ods, odt, pdf, png, svg, and webp
+  JPG:  jpg, odp, ods, odt, pdf, png, svg, and webp
+  PNG:  jpg, odp, ods, odt, pdf, png, svg, and webp
+  WEBP:  jpg, odp, ods, odt, pdf, png, svg, and webp
+  TIFF:  jpg, odp, ods, odt, pdf, png, svg, and webp
+  AI:      jpg, odp, ods, odt, pdf, png, svg, and webp
+  PSD:  jpg, odp, ods, odt, pdf, png, svg, and webp
+  SVG:  jpg, odp, ods, odt, pdf, png, and webp
+  HTML:  jpg, odt, pdf, svg, txt, and webp
+  TXT:  jpg, html, odt, pdf, svg, and webp
   """
   format: DocumentFileTypes
 }
@@ -491,11 +1000,58 @@ input ImageTransformationInput {
   resize: ImageResizeInput
 }
 
+"Input for a geolocation point with latitude and longitude"
+input LocationInput {
+  latitude: Float!
+  longitude: Float!
+}
 
+input PublishLocaleInput {
+  "Locales to publish"
+  locale: Locale!
+  "Stages to publish selected locales to"
+  stages: [Stage!]!
+}
+
+"Input type representing a RGBA color value: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#rgb()_and_rgba()"
+input RGBAInput {
+  a: RGBATransparency!
+  b: RGBAHue!
+  g: RGBAHue!
+  r: RGBAHue!
+}
+
+input UnpublishLocaleInput {
+  "Locales to unpublish"
+  locale: Locale!
+  "Stages to unpublish selected locales from"
+  stages: [Stage!]!
+}
+
+input VersionWhereInput {
+  id: ID!
+  revision: Int!
+  stage: Stage!
+}
+
+
+"Raw JSON value"
+scalar Json
+
+"A date string, such as 2007-12-03 (YYYY-MM-DD), compliant with ISO 8601 standard for representation of dates using the Gregorian calendar."
+scalar Date
+
+"The Long scalar type represents non-fractional signed whole numeric values. Long can represent values between -(2^63) and 2^63 - 1."
+scalar Long
+
+"A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the date-timeformat outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representationof dates and times using the Gregorian calendar."
 scalar DateTime
 
-"""
-The `Long` scalar type represents non-fractional signed whole numeric values.
-Long can represent values between -(2^63) and 2^63 - 1.
-"""
-scalar Long
+scalar RGBATransparency
+
+scalar RGBAHue
+
+"Slate-compatible RichText AST"
+scalar RichTextAST
+
+scalar Hex

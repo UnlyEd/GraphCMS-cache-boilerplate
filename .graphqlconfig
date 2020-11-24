@@ -3,7 +3,7 @@
   "extensions": {
     "endpoints": {
       "staging": {
-        "url": "https://api-euwest.graphcms.com/v1/cjyi8gl5m00tm01e91polc50t/master",
+        "url": "https://api-eu-central-1.graphcms.com/v2/cjyi8gl5m00tm01e91polc50t/master",
         "introspect": true,
         "headers": {
           "user-agent": "JS GraphQL",
@@ -11,7 +11,7 @@
         }
       },
       "production": {
-        "url": "https://api-euwest.graphcms.com/v1/cjyi8gl5m00tm01e91polc50t/master",
+        "url": "https://api-eu-central-1.graphcms.com/v2/cjyi8gl5m00tm01e91polc50t/master",
         "introspect": true,
         "headers": {
           "user-agent": "JS GraphQL",
